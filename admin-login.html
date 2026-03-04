@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Admin Login — SafeLink Pro</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="login-wrap">
+  <div class="login-card anim">
+    <div class="login-logo">Safe<span class="dot">Link</span> Pro</div>
+    <div class="login-sub">Admin Dashboard — Masuk untuk mengelola link</div>
+
+    <div class="form-group">
+      <label class="form-label">Password Admin</label>
+      <input type="password" class="form-input" id="passwordInput"
+        placeholder="Masukkan password" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter') doLogin()"/>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()" id="loginBtn">
+      Masuk
+    </button>
+    <div style="text-align:center;margin-top:16px">
+      <a href="/" style="font-size:12px;color:var(--text3)">← Kembali ke beranda</a>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<script src="/js/main.js"></script>
+<script>
+// Jika sudah login, redirect ke admin
+if (sessionStorage.getItem('slp_admin')) {
+  location.href = '/admin.html';
+}
+
+async function doLogin() {
+  const pw = document.getElementById('passwordInput').value.trim();
+  if (!pw) { showToast('Masukkan password dulu!', 'err'); return; }
+
+  const btn = document.getElementById('loginBtn');
+  btn.textContent = 'Memverifikasi...';
+  btn.disabled = true;
+
+  try {
+    const r = await fetch('/api/links?admin=1', {
+      headers: { 'X-Admin-Password': pw }
+    });
+    if (r.ok) {
+      sessionStorage.setItem('slp_admin', pw);
+      showToast('Login berhasil!', 'ok');
+      setTimeout(() => location.href = '/admin.html', 600);
+    } else {
+      showToast('Password salah!', 'err');
+      btn.textContent = 'Masuk';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    showToast('Gagal koneksi ke server', 'err');
+    btn.textContent = 'Masuk';
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

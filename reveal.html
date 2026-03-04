@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Konten Siap — SafeLink Pro</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="reveal-wrap">
+  <!-- Iklan di atas -->
+  <div style="width:100%;max-width:540px;margin-bottom:20px">
+    <!-- Paste kode iklan Adsterra di sini -->
+  </div>
+
+  <div class="reveal-card anim" id="revealCard">
+    <!-- Loading state -->
+    <div id="loadingState" style="text-align:center;padding:20px">
+      <div style="font-size:32px;margin-bottom:12px">⏳</div>
+      <div style="color:var(--text2);font-size:14px">Memuat konten...</div>
+    </div>
+
+    <!-- URL content -->
+    <div id="urlContent" style="display:none">
+      <div class="reveal-success">✓</div>
+      <div class="reveal-title">Link Siap!</div>
+      <div class="reveal-sub">Klik tombol di bawah untuk melanjutkan ke tujuan</div>
+      <div class="content-box">
+        <div class="content-box-label">Link Tujuan</div>
+        <div class="content-url" id="urlDisplay"></div>
+      </div>
+      <a href="#" class="btn btn-primary btn-full" id="urlBtn" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
+        Buka Link
+      </a>
+      <button onclick="copyToClipboard(document.getElementById('urlDisplay').textContent)" class="btn btn-ghost btn-full" style="margin-top:10px">
+        Salin Link
+      </button>
+    </div>
+
+    <!-- File content -->
+    <div id="fileContent" style="display:none">
+      <div class="reveal-success">📦</div>
+      <div class="reveal-title">File Siap Diunduh!</div>
+      <div class="reveal-sub">Klik tombol di bawah untuk mulai download</div>
+      <div class="content-box">
+        <div class="content-box-label">File</div>
+        <div class="content-url" id="fileDisplay"></div>
+      </div>
+      <a href="#" class="btn btn-primary btn-full" id="fileBtn" download>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Download File
+      </a>
+    </div>
+
+    <!-- Text content -->
+    <div id="textContent" style="display:none">
+      <div class="reveal-success">📝</div>
+      <div class="reveal-title">Konten Tersedia!</div>
+      <div class="reveal-sub">Teks tersembunyi telah terbuka</div>
+      <div class="content-box">
+        <div class="content-box-label">Konten</div>
+        <div class="content-text" id="textDisplay"></div>
+      </div>
+      <button onclick="copyToClipboard(document.getElementById('textDisplay').textContent)" class="btn btn-primary btn-full">
+        Salin Teks
+      </button>
+    </div>
+
+    <!-- Error state -->
+    <div id="errorState" style="display:none;text-align:center;padding:20px">
+      <div style="font-size:32px;margin-bottom:12px">❌</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px">Konten tidak ditemukan</div>
+      <div style="color:var(--text2);font-size:13px;margin-bottom:20px">Silakan akses ulang melalui link original</div>
+      <a href="/" class="btn btn-ghost">← Kembali ke Beranda</a>
+    </div>
+  </div>
+
+  <!-- Iklan di bawah -->
+  <div style="width:100%;max-width:540px;margin-top:20px">
+    <!-- Paste kode iklan Adsterra di sini -->
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<script src="/js/main.js"></script>
+<script>
+const linkId = getParam('id');
+
+function hideAll() {
+  ['loadingState','urlContent','fileContent','textContent','errorState'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+}
+
+function showContent(data) {
+  hideAll();
+  if (!data || !data.type) {
+    document.getElementById('errorState').style.display = 'block';
+    return;
+  }
+
+  if (data.type === 'url') {
+    const el = document.getElementById('urlContent');
+    el.style.display = 'block';
+    document.getElementById('urlDisplay').textContent = data.target;
+    document.getElementById('urlBtn').href = data.target;
+    // Auto redirect after 3 seconds
+    setTimeout(() => { window.open(data.target, '_blank'); }, 1500);
+  } else if (data.type === 'file') {
+    const el = document.getElementById('fileContent');
+    el.style.display = 'block';
+    document.getElementById('fileDisplay').textContent = data.target;
+    document.getElementById('fileBtn').href = data.target;
+    setTimeout(() => { document.getElementById('fileBtn').click(); }, 1500);
+  } else if (data.type === 'text') {
+    const el = document.getElementById('textContent');
+    el.style.display = 'block';
+    document.getElementById('textDisplay').textContent = data.content || data.target;
+  }
+}
+
+async function init() {
+  if (!linkId) { hideAll(); document.getElementById('errorState').style.display = 'block'; return; }
+
+  // Coba dari sessionStorage dulu (sudah lewat countdown)
+  const cached = sessionStorage.getItem('reveal_' + linkId);
+  if (cached) {
+    try {
+      const data = JSON.parse(cached);
+      showContent(data);
+      sessionStorage.removeItem('reveal_' + linkId);
+      return;
+    } catch(e) {}
+  }
+
+  // Kalau tidak ada di session, fetch ulang (user langsung akses reveal)
+  // Redirect ke link page dulu
+  location.href = '/link.html?id=' + linkId;
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

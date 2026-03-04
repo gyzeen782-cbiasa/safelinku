@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Dashboard — SafeLink Pro</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <style>
+    .tab-bar { display:flex; gap:4px; margin-bottom:24px; background:var(--bg2); padding:4px; border-radius:10px; width:fit-content; }
+    .tab-btn { padding:8px 18px; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; background:none; border:none; color:var(--text2); }
+    .tab-btn.active { background:var(--bg3); color:var(--text); }
+    .panel { display:none; }
+    .panel.active { display:block; }
+    .link-row td:first-child { max-width: 180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .shortlink-cell { display:flex; align-items:center; gap:6px; }
+  </style>
+</head>
+<body>
+<div class="orb orb-1"></div>
+
+<nav class="navbar">
+  <div class="nav-logo">Safe<span class="dot">Link</span> Pro</div>
+  <div class="nav-actions">
+    <a href="/" class="btn btn-ghost btn-sm">Beranda</a>
+    <button class="btn btn-ghost btn-sm" onclick="doLogout()">Keluar</button>
+  </div>
+</nav>
+
+<div class="admin-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-label">Menu</div>
+    <button class="sidebar-item active" onclick="showPanel('dashboard', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </button>
+    <button class="sidebar-item" onclick="showPanel('create', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      Buat Link
+    </button>
+    <button class="sidebar-item" onclick="showPanel('links', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      Kelola Link
+    </button>
+    <div class="sidebar-label" style="margin-top:16px">Info</div>
+    <button class="sidebar-item" onclick="showPanel('settings', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4 12H2M22 12h-2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 20v2M12 2v2"/></svg>
+      Cara Pasang Iklan
+    </button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- DASHBOARD PANEL -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="page-header">
+        <h1>Dashboard</h1>
+        <p>Selamat datang di panel admin SafeLink Pro</p>
+      </div>
+      <div class="stats-cards" id="statsCards">
+        <div class="stat-card"><div class="stat-card-num" id="s-total">—</div><div class="stat-card-label">Total Link</div></div>
+        <div class="stat-card"><div class="stat-card-num" id="s-clicks">—</div><div class="stat-card-label">Total Klik</div></div>
+        <div class="stat-card"><div class="stat-card-num" id="s-today">—</div><div class="stat-card-label">Klik Hari Ini</div></div>
+        <div class="stat-card"><div class="stat-card-num" id="s-active">—</div><div class="stat-card-label">Link Aktif</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Link Terbaru</div>
+        <div class="table-wrap">
+          <table id="recentTable">
+            <thead><tr><th>Judul</th><th>Short Link</th><th>Tipe</th><th>Klik</th><th>Dibuat</th></tr></thead>
+            <tbody id="recentBody"><tr><td colspan="5" style="color:var(--text3);text-align:center;padding:24px">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CREATE PANEL -->
+    <div class="panel" id="panel-create">
+      <div class="page-header">
+        <h1>Buat Link Baru</h1>
+        <p>Sembunyikan konten di balik halaman iklan</p>
+      </div>
+      <div class="card" style="max-width:600px">
+        <div class="form-group">
+          <label class="form-label">Judul Link *</label>
+          <input type="text" class="form-input" id="c-title" placeholder="cth: Download Mod Minecraft v1.2"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Deskripsi (opsional)</label>
+          <input type="text" class="form-input" id="c-desc" placeholder="Deskripsi singkat untuk visitor"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipe Konten *</label>
+          <select class="form-input" id="c-type" onchange="updateTypeUI()">
+            <option value="url">🌐 URL / Link Redirect</option>
+            <option value="file">📦 File / Download Link</option>
+            <option value="text">📝 Teks Tersembunyi</option>
+          </select>
+        </div>
+        <div class="form-group" id="field-target">
+          <label class="form-label" id="label-target">URL Tujuan *</label>
+          <input type="text" class="form-input" id="c-target" placeholder="https://..."/>
+        </div>
+        <div class="form-group" id="field-text" style="display:none">
+          <label class="form-label">Teks / Konten *</label>
+          <textarea class="form-input" id="c-content" placeholder="Masukkan teks, password, kode, atau konten apa pun yang ingin disembunyikan..." rows="5" style="resize:vertical"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Countdown (detik)</label>
+            <input type="number" class="form-input" id="c-countdown" value="15" min="5" max="60"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password (opsional)</label>
+            <input type="text" class="form-input" id="c-password" placeholder="Kosongkan jika tidak perlu"/>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="createLink()" id="createBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Buat Link
+        </button>
+      </div>
+
+      <!-- Result -->
+      <div class="card" id="createResult" style="max-width:600px;margin-top:16px;display:none;border-color:rgba(245,166,35,0.4)">
+        <div class="card-title">Link Berhasil Dibuat! 🎉</div>
+        <div style="margin-bottom:14px">
+          <div class="form-label" style="margin-bottom:6px">Short Link</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="form-input" id="resultUrl" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);cursor:text"></div>
+            <button class="btn btn-primary btn-sm" onclick="copyResult()">Salin</button>
+          </div>
+        </div>
+        <a href="#" id="resultPreview" target="_blank" class="btn btn-ghost btn-sm">Preview →</a>
+      </div>
+    </div>
+
+    <!-- LINKS PANEL -->
+    <div class="panel" id="panel-links">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between">
+        <div><h1>Kelola Link</h1><p>Semua link yang sudah dibuat</p></div>
+        <button class="btn btn-ghost btn-sm" onclick="loadLinks()">Refresh</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Judul</th><th>Short Link</th><th>Tipe</th><th>Klik</th><th>Dibuat</th><th>Aksi</th></tr></thead>
+            <tbody id="linksBody"><tr><td colspan="6" style="color:var(--text3);text-align:center;padding:24px">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS PANEL -->
+    <div class="panel" id="panel-settings">
+      <div class="page-header">
+        <h1>Cara Pasang Iklan Adsterra</h1>
+        <p>Ikuti langkah berikut setelah akun Adsterra disetujui</p>
+      </div>
+      <div class="card" style="max-width:680px">
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <div>
+            <div style="font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="background:var(--accent);color:#000;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">1</span> Login Adsterra & pilih format iklan</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.7">Buka publishers.adsterra.com → Websites → pilih website → Add Format. Pilih <strong style="color:var(--text)">Popunder</strong> atau <strong style="color:var(--text)">Social Bar</strong> untuk hasil terbaik di link shortener.</div>
+          </div>
+          <div>
+            <div style="font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="background:var(--accent);color:#000;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">2</span> Salin kode script iklan</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.7">Adsterra akan memberikan kode script. Salin kode tersebut.</div>
+          </div>
+          <div>
+            <div style="font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="background:var(--accent);color:#000;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">3</span> Paste di file link.html & reveal.html</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.7">Buka file <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;color:var(--accent)">link.html</code> dan <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;color:var(--accent)">reveal.html</code>, cari komentar bertuliskan <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;color:var(--accent)">Paste kode iklan Adsterra di sini</code>, lalu paste script dari Adsterra di sana.</div>
+          </div>
+          <div>
+            <div style="font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="background:var(--accent);color:#000;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">4</span> Commit ke GitHub → Vercel auto-deploy</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.7">Setelah paste kode iklan, commit file tersebut ke GitHub. Vercel akan otomatis deploy perubahan. Selesai! 🎉</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<script src="/js/main.js"></script>
+<script>
+const adminPw = sessionStorage.getItem('slp_admin');
+if (!adminPw) location.href = '/admin-login.html';
+
+const BASE_URL = location.origin;
+
+// ── PANEL NAVIGATION ──
+function showPanel(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'links') loadLinks();
+}
+
+// ── AUTH HEADER ──
+const authHeader = { 'X-Admin-Password': adminPw, 'Content-Type': 'application/json' };
+
+// ── DASHBOARD ──
+async function loadDashboard() {
+  try {
+    const r = await fetch('/api/links?admin=1', { headers: authHeader });
+    const d = await r.json();
+    const links = d.links || [];
+    const totalClicks = links.reduce((a, l) => a + (l.clicks || 0), 0);
+    const today = links.reduce((a, l) => a + (l.clicksToday || 0), 0);
+    document.getElementById('s-total').textContent = links.length;
+    document.getElementById('s-clicks').textContent = formatNum(totalClicks);
+    document.getElementById('s-today').textContent = formatNum(today);
+    document.getElementById('s-active').textContent = links.length;
+    // Recent 5
+    const tbody = document.getElementById('recentBody');
+    if (!links.length) { tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text3);text-align:center;padding:24px">Belum ada link</td></tr>'; return; }
+    tbody.innerHTML = links.slice(0, 5).map(l => linkRow(l, 5)).join('');
+  } catch(e) { console.error(e); }
+}
+
+function linkRow(l, cols = 6) {
+  const shortUrl = `${BASE_URL}/l/${l.id}`;
+  const typeMap = { url: 'badge-url', file: 'badge-file', text: 'badge-text' };
+  const typeLabel = { url: 'URL', file: 'File', text: 'Teks' };
+  const deleteBtn = cols === 6 ? `<td><button class="btn btn-danger btn-sm" onclick="deleteLink('${l.id}')">Hapus</button></td>` : '';
+  return `<tr class="link-row">
+    <td>${l.title || '—'}</td>
+    <td class="td-code">
+      <div class="shortlink-cell">
+        <span>/l/${l.id}</span>
+        <button onclick="copyToClipboard('${shortUrl}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px" title="Salin">⧉</button>
+      </div>
+    </td>
+    <td><span class="badge ${typeMap[l.type] || ''}">${typeLabel[l.type] || l.type}</span></td>
+    <td>${formatNum(l.clicks || 0)}</td>
+    <td style="color:var(--text2);font-size:12px">${l.created ? timeAgo(l.created) : '—'}</td>
+    ${deleteBtn}
+  </tr>`;
+}
+
+async function loadLinks() {
+  const tbody = document.getElementById('linksBody');
+  tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text3);text-align:center;padding:24px">Memuat...</td></tr>';
+  try {
+    const r = await fetch('/api/links?admin=1', { headers: authHeader });
+    const d = await r.json();
+    const links = d.links || [];
+    if (!links.length) { tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text3);text-align:center;padding:24px">Belum ada link. <a href="#" onclick="showPanel(\'create\')" style="color:var(--accent)">Buat link pertama →</a></td></tr>'; return; }
+    tbody.innerHTML = links.map(l => linkRow(l, 6)).join('');
+  } catch(e) { tbody.innerHTML = '<tr><td colspan="6" style="color:var(--red);text-align:center;padding:24px">Gagal memuat</td></tr>'; }
+}
+
+// ── CREATE ──
+function updateTypeUI() {
+  const type = document.getElementById('c-type').value;
+  const labels = { url: 'URL Tujuan *', file: 'URL File / Download *', text: '' };
+  document.getElementById('label-target').textContent = labels[type] || 'Target *';
+  document.getElementById('field-target').style.display = type === 'text' ? 'none' : 'block';
+  document.getElementById('field-text').style.display = type === 'text' ? 'block' : 'none';
+}
+
+async function createLink() {
+  const title = document.getElementById('c-title').value.trim();
+  const type = document.getElementById('c-type').value;
+  const target = document.getElementById('c-target').value.trim();
+  const content = document.getElementById('c-content').value.trim();
+  const countdown = parseInt(document.getElementById('c-countdown').value) || 15;
+  const password = document.getElementById('c-password').value.trim();
+  const desc = document.getElementById('c-desc').value.trim();
+
+  if (!title) { showToast('Judul wajib diisi!', 'err'); return; }
+  if (type !== 'text' && !target) { showToast('Target URL wajib diisi!', 'err'); return; }
+  if (type === 'text' && !content) { showToast('Konten teks wajib diisi!', 'err'); return; }
+
+  const btn = document.getElementById('createBtn');
+  btn.textContent = 'Membuat...'; btn.disabled = true;
+
+  try {
+    const r = await fetch('/api/create', {
+      method: 'POST',
+      headers: authHeader,
+      body: JSON.stringify({ title, desc, type, target, content, countdown, password })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Gagal');
+
+    const shortUrl = `${BASE_URL}/l/${d.id}`;
+    document.getElementById('resultUrl').textContent = shortUrl;
+    document.getElementById('resultPreview').href = shortUrl;
+    document.getElementById('createResult').style.display = 'block';
+    document.getElementById('createResult').scrollIntoView({ behavior: 'smooth' });
+    showToast('Link berhasil dibuat!', 'ok');
+    // Reset form
+    ['c-title','c-desc','c-target','c-password','c-content'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    document.getElementById('c-countdown').value = '15';
+  } catch(e) {
+    showToast('Gagal: ' + e.message, 'err');
+  }
+  btn.textContent = 'Buat Link'; btn.disabled = false;
+}
+
+function copyResult() {
+  copyToClipboard(document.getElementById('resultUrl').textContent);
+}
+
+// ── DELETE ──
+async function deleteLink(id) {
+  if (!confirm('Hapus link ini? Tidak bisa dikembalikan!')) return;
+  try {
+    const r = await fetch(`/api/delete?id=${id}`, { method: 'DELETE', headers: authHeader });
+    if (r.ok) { showToast('Link dihapus', 'ok'); loadLinks(); loadDashboard(); }
+    else showToast('Gagal menghapus', 'err');
+  } catch(e) { showToast('Error: ' + e.message, 'err'); }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('slp_admin');
+  location.href = '/admin-login.html';
+}
+
+// Init
+loadDashboard();
+</script>
+</body>
+</html>

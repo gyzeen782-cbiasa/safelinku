@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>SafeLink Pro — Link Shortener & Content Locker</title>
+  <meta name="description" content="Buat link aman dengan iklan, sembunyikan konten di balik countdown. Gratis."/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<nav class="navbar">
+  <div class="nav-logo">Safe<span class="dot">Link</span> Pro</div>
+  <div class="nav-actions">
+    <a href="admin-login.html" class="btn btn-ghost btn-sm">Admin</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge anim">
+    <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="#f5a623"/></svg>
+    Link Shortener + Content Locker
+  </div>
+  <h1 class="hero-title anim d1">
+    Lindungi Link-mu,<br/><span>Raup Penghasilan</span>
+  </h1>
+  <p class="hero-sub anim d2">
+    Sembunyikan URL, file ZIP, atau teks rahasia di balik halaman iklan.
+    Visitor nonton iklan, kamu dapat cuan.
+  </p>
+  <div class="hero-cta anim d3">
+    <a href="admin-login.html" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      Buat Link Sekarang
+    </a>
+    <a href="#cara-kerja" class="btn btn-ghost">Cara Kerja →</a>
+  </div>
+
+  <div class="stats-row anim d3">
+    <div class="stat-item">
+      <span class="stat-num" id="statLinks">—</span>
+      <div class="stat-lbl">Total Link</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" id="statClicks">—</span>
+      <div class="stat-lbl">Total Klik</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">100%</span>
+      <div class="stat-lbl">Gratis</div>
+    </div>
+  </div>
+</section>
+
+<!-- CARA KERJA -->
+<section class="section" id="cara-kerja">
+  <div class="section-label">Cara Kerja</div>
+  <div class="section-title">Simpel banget, 3 langkah</div>
+  <div class="features-grid">
+    <div class="feature-card anim">
+      <div class="feature-icon">🔗</div>
+      <div class="feature-title">1. Buat Link</div>
+      <div class="feature-desc">Masukkan URL tujuan, file ZIP, atau teks konten. Sistem generate shortlink unik untukmu.</div>
+    </div>
+    <div class="feature-card anim d1">
+      <div class="feature-icon">📢</div>
+      <div class="feature-title">2. Visitor Lihat Iklan</div>
+      <div class="feature-desc">Siapa pun yang klik linkmu akan dihadapkan countdown timer sambil melihat iklan Adsterra.</div>
+    </div>
+    <div class="feature-card anim d2">
+      <div class="feature-icon">💰</div>
+      <div class="feature-title">3. Kamu Dapat Cuan</div>
+      <div class="feature-desc">Setiap visitor yang melewati iklan menghasilkan revenue untuk akun Adsterra-mu.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FITUR -->
+<section class="section" style="padding-top:0">
+  <div class="section-label">Fitur</div>
+  <div class="section-title">Semua yang kamu butuhkan</div>
+  <div class="features-grid">
+    <div class="feature-card anim">
+      <div class="feature-icon">🌐</div>
+      <div class="feature-title">Link Redirect</div>
+      <div class="feature-desc">Sembunyikan URL tujuan di balik halaman iklan. Cocok untuk affiliate link.</div>
+    </div>
+    <div class="feature-card anim d1">
+      <div class="feature-icon">📦</div>
+      <div class="feature-title">File & ZIP</div>
+      <div class="feature-desc">Kunci link download di balik iklan. Visitor harus menunggu sebelum bisa download.</div>
+    </div>
+    <div class="feature-card anim d2">
+      <div class="feature-icon">📝</div>
+      <div class="feature-title">Teks Tersembunyi</div>
+      <div class="feature-desc">Sembunyikan password, kode, atau teks rahasia apa pun di balik countdown.</div>
+    </div>
+    <div class="feature-card anim">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Statistik Klik</div>
+      <div class="feature-desc">Pantau berapa kali tiap link dikunjungi langsung dari dashboard admin.</div>
+    </div>
+    <div class="feature-card anim d1">
+      <div class="feature-icon">⏱️</div>
+      <div class="feature-title">Countdown Timer</div>
+      <div class="feature-desc">Atur berapa detik visitor harus menunggu sebelum tombol lanjut muncul.</div>
+    </div>
+    <div class="feature-card anim d2">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title">Password Optional</div>
+      <div class="feature-desc">Tambahkan lapisan proteksi password untuk konten sensitif.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer style="border-top:1px solid var(--border);padding:32px;text-align:center;font-size:12px;color:var(--text3);position:relative;z-index:1">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;margin-bottom:8px">Safe<span style="color:var(--accent)">Link</span> Pro</div>
+  Link Shortener & Content Locker — Powered by Adsterra
+</footer>
+
+<div class="toasts" id="toasts"></div>
+<script src="js/main.js"></script>
+<script>
+// Load public stats
+fetch('/api/links?stats=1')
+  .then(r => r.json())
+  .then(d => {
+    document.getElementById('statLinks').textContent = formatNum(d.totalLinks || 0);
+    document.getElementById('statClicks').textContent = formatNum(d.totalClicks || 0);
+  })
+  .catch(() => {
+    document.getElementById('statLinks').textContent = '0';
+    document.getElementById('statClicks').textContent = '0';
+  });
+</script>
+</body>
+</html>

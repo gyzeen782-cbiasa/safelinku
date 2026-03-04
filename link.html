@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Tunggu sebentar... — SafeLink Pro</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <!-- ============================================
+    PASANG SCRIPT ADSTERRA DI SINI
+    Ganti komentar ini dengan kode dari dashboard Adsterra-mu
+    Contoh: <script async src="//...adsterra script..."></script>
+  ============================================= -->
+</head>
+<body>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="countdown-wrap">
+  <!-- Atas: bisa taruh iklan banner Adsterra di sini -->
+  <div style="width:100%;max-width:520px;margin-bottom:20px" id="adTop">
+    <!-- Adsterra Banner 728x90 atau 320x50 untuk mobile -->
+    <!-- Paste kode iklan Adsterra di sini -->
+  </div>
+
+  <div class="countdown-card anim" id="mainCard">
+    <div class="countdown-header">
+      <div class="countdown-icon" id="linkIcon">🔗</div>
+      <div>
+        <div class="countdown-title" id="linkTitle">Memuat...</div>
+        <div class="countdown-sub" id="linkSub">Harap tunggu, halaman sedang disiapkan</div>
+      </div>
+    </div>
+
+    <!-- Adsterra Social Bar / in-page ad bisa dipasang di sini -->
+    <div class="ad-box" id="adMiddle">
+      <!-- Paste kode iklan Adsterra di sini -->
+      <span>[ Ruang Iklan ]</span>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Mohon tunggu...</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="timer-big">
+      <div class="timer-num" id="timerNum">15</div>
+    </div>
+    <div class="timer-label">detik tersisa</div>
+
+    <div class="countdown-footer">
+      <button class="btn-continue" id="continueBtn" disabled onclick="doReveal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        Lanjutkan
+      </button>
+      <div class="disclaimer">
+        Konten ini dikunci untuk menampilkan iklan.<br/>
+        Dengan melanjutkan, kamu menyetujui tampilnya iklan.
+      </div>
+    </div>
+  </div>
+
+  <!-- Bawah: iklan banner lagi -->
+  <div style="width:100%;max-width:520px;margin-top:20px" id="adBottom">
+    <!-- Adsterra Banner di sini -->
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<script src="/js/main.js"></script>
+<script>
+const linkId = getParam('id') || location.pathname.split('/l/')[1];
+let linkData = null;
+let totalSeconds = 15;
+let elapsed = 0;
+let timer = null;
+
+if (!linkId) {
+  document.getElementById('linkTitle').textContent = 'Link tidak valid';
+  document.getElementById('linkSub').textContent = 'ID tidak ditemukan';
+} else {
+  loadLink();
+}
+
+async function loadLink() {
+  try {
+    // Track klik
+    fetch('/api/click', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: linkId })
+    });
+
+    const r = await fetch(`/api/link?id=${linkId}`);
+    if (!r.ok) throw new Error('Not found');
+    linkData = await r.json();
+
+    // Set icon dan judul
+    const icons = { url: '🔗', file: '📦', text: '📝' };
+    document.getElementById('linkIcon').textContent = icons[linkData.type] || '🔗';
+    document.getElementById('linkTitle').textContent = linkData.title || 'Konten Terkunci';
+    document.getElementById('linkSub').textContent = linkData.desc || 'Tunggu countdown selesai untuk melanjutkan';
+    document.title = (linkData.title || 'Konten') + ' — SafeLink Pro';
+
+    // Set timer
+    totalSeconds = linkData.countdown || 15;
+    document.getElementById('timerNum').textContent = totalSeconds;
+
+    startCountdown();
+  } catch(e) {
+    document.getElementById('linkTitle').textContent = 'Link tidak ditemukan';
+    document.getElementById('linkSub').textContent = 'Link mungkin sudah kadaluarsa atau tidak valid';
+    document.getElementById('timerNum').textContent = '—';
+  }
+}
+
+function startCountdown() {
+  elapsed = 0;
+  timer = setInterval(() => {
+    elapsed++;
+    const remaining = totalSeconds - elapsed;
+    const pct = Math.min((elapsed / totalSeconds) * 100, 100);
+
+    document.getElementById('timerNum').textContent = Math.max(remaining, 0);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = Math.floor(pct) + '%';
+
+    if (elapsed >= totalSeconds) {
+      clearInterval(timer);
+      const btn = document.getElementById('continueBtn');
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg> Lanjutkan`;
+      btn.classList.add('ready');
+      document.getElementById('progressFill').style.transition = 'none';
+      showToast('Siap! Klik lanjutkan sekarang 🎉', 'ok');
+    }
+  }, 1000);
+}
+
+async function doReveal() {
+  if (!linkData) return;
+
+  // Cek password jika ada
+  if (linkData.hasPassword) {
+    const pw = prompt('Masukkan password untuk konten ini:');
+    if (!pw) return;
+    const r2 = await fetch(`/api/link?id=${linkId}&pw=${encodeURIComponent(pw)}`);
+    if (!r2.ok) { showToast('Password salah!', 'err'); return; }
+    const d2 = await r2.json();
+    if (!d2.unlocked) { showToast('Password salah!', 'err'); return; }
+    linkData = d2;
+  }
+
+  // Redirect ke reveal page
+  sessionStorage.setItem('reveal_' + linkId, JSON.stringify(linkData));
+window.open('https://www.effectivegatecpm.com/cvtdw3esn0?key=533d2747d1d83a2e70d1acaf8fb03d8f', '_blank');
+setTimeout(() => { location.href = '/reveal.html?id=' + linkId; }, 500);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/l/:id", "destination": "/link.html" },
+    { "source": "/api/link", "destination": "/api/link.js" },
+    { "source": "/api/create", "destination": "/api/create.js" },
+    { "source": "/api/click", "destination": "/api/click.js" },
+    { "source": "/api/links", "destination": "/api/links.js" },
+    { "source": "/api/delete", "destination": "/api/delete.js" }
+  ]
+}
