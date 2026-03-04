@@ -30,24 +30,46 @@
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-label">Menu</div>
-    <button class="sidebar-item active" onclick="showPanel('dashboard', this)">
+    <button class="sidebar-item active" onclick="showPanel('dashboard', this, 'mnav-dashboard')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       Dashboard
     </button>
-    <button class="sidebar-item" onclick="showPanel('create', this)">
+    <button class="sidebar-item" onclick="showPanel('create', this, 'mnav-create')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
       Buat Link
     </button>
-    <button class="sidebar-item" onclick="showPanel('links', this)">
+    <button class="sidebar-item" onclick="showPanel('links', this, 'mnav-links')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
       Kelola Link
     </button>
     <div class="sidebar-label" style="margin-top:16px">Info</div>
-    <button class="sidebar-item" onclick="showPanel('settings', this)">
+    <button class="sidebar-item" onclick="showPanel('settings', this, 'mnav-settings')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4 12H2M22 12h-2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 20v2M12 2v2"/></svg>
       Cara Pasang Iklan
     </button>
   </aside>
+
+<!-- MOBILE BOTTOM NAV (admin) -->
+<nav class="mobile-admin-nav" id="mobileAdminNav">
+  <div class="mobile-admin-nav-items">
+    <button class="mobile-admin-nav-item active" id="mnav-dashboard" onclick="showPanel('dashboard', this, 'mnav-dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </button>
+    <button class="mobile-admin-nav-item" id="mnav-create" onclick="showPanel('create', this, 'mnav-create')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      <span>Buat Link</span>
+    </button>
+    <button class="mobile-admin-nav-item" id="mnav-links" onclick="showPanel('links', this, 'mnav-links')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      <span>Link Saya</span>
+    </button>
+    <button class="mobile-admin-nav-item" id="mnav-settings" onclick="showPanel('settings', this, 'mnav-settings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4 12H2M22 12h-2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 20v2M12 2v2"/></svg>
+      <span>Info Iklan</span>
+    </button>
+  </div>
+</nav>
 
   <!-- MAIN -->
   <main class="main-content">
@@ -192,19 +214,24 @@
 <div class="toasts" id="toasts"></div>
 <script src="/js/main.js"></script>
 <script>
-const adminPw = sessionStorage.getItem('slp_admin');
+const adminPw = localStorage.getItem('slp_admin');
 if (!adminPw) location.href = '/admin-login.html';
 
 const BASE_URL = location.origin;
 
 // ── PANEL NAVIGATION ──
-function showPanel(name, btn) {
+function showPanel(name, btn, mnavId) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.mobile-admin-nav-item').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
   if (btn) btn.classList.add('active');
+  // Also highlight mobile nav
+  const mnavEl = document.getElementById(mnavId || 'mnav-' + name);
+  if (mnavEl) mnavEl.classList.add('active');
   if (name === 'dashboard') loadDashboard();
   if (name === 'links') loadLinks();
+  window.scrollTo(0, 0);
 }
 
 // ── AUTH HEADER ──
@@ -331,7 +358,7 @@ async function deleteLink(id) {
 }
 
 function doLogout() {
-  sessionStorage.removeItem('slp_admin');
+  localStorage.removeItem('slp_admin');
   location.href = '/admin-login.html';
 }
 
