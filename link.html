@@ -3,162 +3,714 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Tunggu sebentar... — SafeLink Pro</title>
+  <title>Membuka Konten...</title>
   <link rel="stylesheet" href="/css/style.css"/>
-  <!-- ============================================
-    PASANG SCRIPT ADSTERRA DI SINI
-    Ganti komentar ini dengan kode dari dashboard Adsterra-mu
-    Contoh: <script async src="//...adsterra script..."></script>
-  ============================================= -->
+  <!-- Paste script Adsterra Popunder/Smartlink di sini -->
+  <style>
+    /* ── MULTI-STEP LAYOUT ── */
+    body { background: var(--bg); }
+    .step-page { display:none; min-height:100vh; flex-direction:column; }
+    .step-page.active { display:flex; }
+
+    /* Top bar progress */
+    .topbar {
+      position:fixed; top:0; left:0; right:0; z-index:100;
+      background:rgba(7,7,14,0.95); backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--border); padding:0 20px;
+      height:52px; display:flex; align-items:center; gap:14px;
+    }
+    .topbar-logo { font-family:'JetBrains Mono',monospace; font-weight:700; font-size:15px; flex-shrink:0; }
+    .topbar-logo span { color:var(--accent); }
+    .steps-track { flex:1; display:flex; gap:4px; align-items:center; }
+    .step-dot {
+      flex:1; height:4px; border-radius:4px;
+      background:var(--bg3); transition:background .4s;
+    }
+    .step-dot.done { background:var(--accent); }
+    .step-dot.active { background:var(--accent); opacity:0.5; }
+    .step-counter { font-size:12px; font-weight:700; color:var(--text2); flex-shrink:0;
+      font-family:'JetBrains Mono',monospace; }
+
+    /* Article area */
+    .article-wrap {
+      padding: 68px 20px 20px; flex:1;
+      max-width:680px; margin:0 auto; width:100%;
+    }
+    .article-tag {
+      display:inline-block; padding:3px 10px; background:var(--accent-s);
+      border:1px solid rgba(245,166,35,0.3); border-radius:20px;
+      font-size:10px; font-weight:700; color:var(--accent);
+      text-transform:uppercase; letter-spacing:1px; margin-bottom:14px;
+    }
+    .article-title { font-size:22px; font-weight:800; line-height:1.3; margin-bottom:10px; letter-spacing:-0.5px; }
+    .article-meta { font-size:12px; color:var(--text3); margin-bottom:18px; display:flex; gap:12px; flex-wrap:wrap; }
+    .article-body { font-size:14px; color:var(--text2); line-height:1.9; }
+    .article-body p { margin-bottom:14px; }
+    .article-body h3 { font-size:16px; font-weight:700; color:var(--text); margin:20px 0 10px; }
+    .article-body ul { padding-left:20px; margin-bottom:14px; }
+    .article-body li { margin-bottom:6px; }
+    .article-body strong { color:var(--text); }
+
+    /* Floating countdown button */
+    .float-btn-wrap {
+      position:sticky; bottom:0; left:0; right:0;
+      padding:16px 20px; background:linear-gradient(to top,var(--bg) 60%,transparent);
+    }
+    .float-btn {
+      width:100%; padding:16px; border-radius:14px; border:none;
+      font-family:'Sora',sans-serif; font-size:15px; font-weight:700;
+      cursor:pointer; transition:all .2s; display:flex; align-items:center;
+      justify-content:center; gap:10px;
+    }
+    .float-btn.waiting {
+      background:var(--bg3); color:var(--text3); cursor:not-allowed;
+      border:1px solid var(--border);
+    }
+    .float-btn.ready {
+      background:var(--accent); color:#000;
+      box-shadow:0 4px 24px var(--accent-g);
+      animation:btnPulse .6s ease 2;
+    }
+    .float-btn.final {
+      background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#000;
+      box-shadow:0 6px 32px var(--accent-g); font-size:17px;
+    }
+    @keyframes btnPulse {
+      0%,100%{box-shadow:0 4px 24px var(--accent-g)}
+      50%{box-shadow:0 4px 48px var(--accent-g),0 0 0 6px rgba(245,166,35,0.12)}
+    }
+    .timer-pill {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:4px 12px; background:rgba(255,255,255,0.07);
+      border-radius:20px; font-family:'JetBrains Mono',monospace;
+      font-size:13px; font-weight:700;
+    }
+
+    /* ── MINI GAME STEP ── */
+    .game-wrap {
+      padding:68px 20px 20px; flex:1;
+      display:flex; flex-direction:column; align-items:center;
+      justify-content:center; text-align:center;
+      max-width:500px; margin:0 auto; width:100%;
+    }
+    .game-title { font-size:22px; font-weight:800; margin-bottom:6px; }
+    .game-sub { font-size:13px; color:var(--text2); margin-bottom:30px; line-height:1.6; }
+    .game-arena {
+      position:relative; width:100%; max-width:380px;
+      height:340px; background:var(--bg2);
+      border:1px solid var(--border); border-radius:20px;
+      overflow:hidden; margin:0 auto 20px;
+    }
+    .game-score-bar {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 16px; border-bottom:1px solid var(--border);
+      font-family:'JetBrains Mono',monospace; font-size:13px;
+    }
+    .game-field { position:relative; flex:1; height:280px; }
+    .click-target {
+      position:absolute; border-radius:50%;
+      background:radial-gradient(circle at 35% 35%, var(--accent), #c97d10);
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      font-size:18px; font-weight:800; color:#000;
+      box-shadow:0 4px 20px var(--accent-g);
+      transition:transform .1s;
+      border:3px solid rgba(255,255,255,0.2);
+      animation:targetPop .2s cubic-bezier(.34,1.56,.64,1);
+      user-select:none;
+    }
+    .click-target:active { transform:scale(0.85); }
+    @keyframes targetPop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+    .click-miss {
+      position:absolute; font-size:20px; pointer-events:none;
+      animation:missAnim .5s ease forwards;
+    }
+    @keyframes missAnim { to{transform:translateY(-40px);opacity:0} }
+    .game-progress-bar { height:6px; background:var(--bg3); border-radius:4px; overflow:hidden; width:100%; max-width:380px; }
+    .game-progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:4px; transition:width .3s; }
+
+    /* ── FINAL REVEAL ── */
+    .reveal-wrap-new {
+      padding:68px 20px 32px; flex:1; max-width:560px;
+      margin:0 auto; width:100%; display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+    }
+    .confetti { font-size:48px; margin-bottom:16px; animation:bounce .6s ease infinite alternate; }
+    @keyframes bounce { from{transform:translateY(0)} to{transform:translateY(-10px)} }
+    .reveal-title { font-size:26px; font-weight:800; text-align:center; margin-bottom:6px; }
+    .reveal-sub { font-size:14px; color:var(--text2); text-align:center; margin-bottom:28px; }
+    .content-reveal-box {
+      width:100%; background:var(--bg2); border:1px solid rgba(245,166,35,0.35);
+      border-radius:16px; padding:22px; margin-bottom:18px;
+    }
+    .content-reveal-label {
+      font-size:10px; font-weight:700; text-transform:uppercase;
+      letter-spacing:1px; color:var(--text3); margin-bottom:10px;
+    }
+    .content-reveal-text {
+      font-family:'JetBrains Mono',monospace; font-size:13px;
+      color:var(--accent); word-break:break-all; line-height:1.7;
+      white-space:pre-wrap;
+    }
+    .btn-get {
+      width:100%; padding:16px; border-radius:14px; border:none;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#000; font-family:'Sora',sans-serif; font-size:16px;
+      font-weight:800; cursor:pointer; display:flex; align-items:center;
+      justify-content:center; gap:10px; box-shadow:0 6px 32px var(--accent-g);
+      transition:all .2s; margin-bottom:10px;
+    }
+    .btn-get:hover { transform:translateY(-2px); }
+    .btn-copy {
+      width:100%; padding:13px; border-radius:14px;
+      background:var(--bg3); border:1px solid var(--border2);
+      color:var(--text2); font-family:'Sora',sans-serif; font-size:14px;
+      font-weight:600; cursor:pointer; transition:all .2s;
+    }
+    .btn-copy:hover { border-color:var(--accent); color:var(--accent); }
+  </style>
 </head>
 <body>
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
 
-<div class="countdown-wrap">
-  <!-- Atas: bisa taruh iklan banner Adsterra di sini -->
-  <div style="width:100%;max-width:520px;margin-bottom:20px" id="adTop">
-    <!-- Adsterra Banner 728x90 atau 320x50 untuk mobile -->
-    <!-- Paste kode iklan Adsterra di sini -->
-  </div>
+<!-- TOP PROGRESS BAR -->
+<div class="topbar">
+  <div class="topbar-logo">Safe<span>Link</span></div>
+  <div class="steps-track" id="stepsTrack"></div>
+  <div class="step-counter" id="stepCounter">1/6</div>
+</div>
 
-  <div class="countdown-card anim" id="mainCard">
-    <div class="countdown-header">
-      <div class="countdown-icon" id="linkIcon">🔗</div>
-      <div>
-        <div class="countdown-title" id="linkTitle">Memuat...</div>
-        <div class="countdown-sub" id="linkSub">Harap tunggu, halaman sedang disiapkan</div>
-      </div>
+<!-- ═══════════════════════════════════════════
+     STEP 1 — Artikel Tips & Trik
+══════════════════════════════════════════════ -->
+<div class="step-page active" id="step1">
+  <div class="article-wrap">
+    <div class="article-tag">Tips & Trik</div>
+    <h1 class="article-title">10 Cara Mengamankan Akun Online dari Serangan Hacker</h1>
+    <div class="article-meta">
+      <span>📅 Diperbarui 2025</span>
+      <span>⏱ 3 menit baca</span>
+      <span>🔒 Keamanan Digital</span>
     </div>
-
-    <!-- Adsterra Social Bar / in-page ad bisa dipasang di sini -->
-    <div class="ad-box" id="adMiddle">
-      <!-- Paste kode iklan Adsterra di sini -->
-      <span>[ Ruang Iklan ]</span>
-    </div>
-
-    <div class="progress-wrap">
-      <div class="progress-label">
-        <span>Mohon tunggu...</span>
-        <span id="progressPct">0%</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill" style="width:0%"></div>
-      </div>
-    </div>
-
-    <div class="timer-big">
-      <div class="timer-num" id="timerNum">15</div>
-    </div>
-    <div class="timer-label">detik tersisa</div>
-
-    <div class="countdown-footer">
-      <button class="btn-continue" id="continueBtn" disabled onclick="doReveal()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-        Lanjutkan
-      </button>
-      <div class="disclaimer">
-        Konten ini dikunci untuk menampilkan iklan.<br/>
-        Dengan melanjutkan, kamu menyetujui tampilnya iklan.
-      </div>
+    <div class="article-body">
+      <p>Di era digital yang semakin maju, keamanan akun online menjadi hal yang tidak bisa diabaikan. Setiap hari, jutaan akun diretas oleh para hacker yang terus mengembangkan teknik mereka. Berikut adalah 10 cara ampuh untuk melindungi akun online-mu.</p>
+      <h3>1. Gunakan Password yang Kuat & Unik</h3>
+      <p>Hindari menggunakan password yang mudah ditebak seperti tanggal lahir atau nama. Gunakan kombinasi <strong>huruf besar, huruf kecil, angka, dan simbol</strong> dengan panjang minimal 12 karakter. Setiap akun harus memiliki password yang berbeda.</p>
+      <h3>2. Aktifkan Two-Factor Authentication (2FA)</h3>
+      <p>2FA menambahkan lapisan keamanan ekstra. Meski hacker berhasil mendapatkan password-mu, mereka tetap tidak bisa masuk tanpa kode verifikasi dari HP-mu. Aktifkan 2FA di semua akun penting seperti email, social media, dan perbankan.</p>
+      <h3>3. Waspada Phishing</h3>
+      <p>Phishing adalah teknik penipuan di mana hacker membuat situs palsu yang mirip dengan aslinya. Selalu periksa URL sebelum memasukkan data. Situs resmi selalu menggunakan <strong>HTTPS</strong> dan domain yang benar.</p>
+      <h3>4. Update Software Secara Rutin</h3>
+      <p>Update bukan hanya menambah fitur baru, tapi juga menutup celah keamanan (security patch). Aktifkan auto-update untuk sistem operasi dan aplikasi penting agar selalu mendapat perlindungan terbaru.</p>
+      <h3>5. Gunakan VPN di Jaringan Publik</h3>
+      <p>Wi-Fi publik di kafe atau mall sangat rentan. Hacker bisa dengan mudah mencuri data yang dikirim melalui jaringan tidak terenkripsi. Gunakan VPN terpercaya setiap kali terkoneksi ke Wi-Fi publik.</p>
+      <ul>
+        <li>Jangan login akun penting di Wi-Fi publik tanpa VPN</li>
+        <li>Pilih VPN yang memiliki kebijakan no-log</li>
+        <li>Hindari VPN gratis yang mencurigakan</li>
+      </ul>
+      <h3>6. Cek Kebocoran Data</h3>
+      <p>Gunakan situs seperti <strong>haveibeenpwned.com</strong> untuk mengecek apakah email-mu pernah bocor dalam data breach. Jika ya, segera ganti password akun tersebut.</p>
     </div>
   </div>
+  <div class="float-btn-wrap">
+    <button class="float-btn waiting" id="btn1" disabled onclick="nextStep(2)">
+      <span class="timer-pill" id="timer1">⏳ 12</span>
+      <span id="btnText1">Lanjut ke Artikel Berikutnya</span>
+    </button>
+  </div>
+</div>
 
-  <!-- Bawah: iklan banner lagi -->
-  <div style="width:100%;max-width:520px;margin-top:20px" id="adBottom">
-    <!-- Adsterra Banner di sini -->
+<!-- ═══════════════════════════════════════════
+     STEP 2 — Mini Game
+══════════════════════════════════════════════ -->
+<div class="step-page" id="step2">
+  <div class="game-wrap">
+    <div class="article-tag">Mini Game</div>
+    <div class="game-title">Klik Target! 🎯</div>
+    <div class="game-sub">Klik semua lingkaran yang muncul sebelum menghilang.<br/>Kumpulkan <strong id="gameTarget">10</strong> poin untuk lanjut!</div>
+    <div class="game-arena">
+      <div class="game-score-bar">
+        <span>Skor: <strong id="gameScore">0</strong></span>
+        <span id="gameStatus">Mulai sekarang!</span>
+      </div>
+      <div class="game-field" id="gameField" onclick="handleMiss(event)"></div>
+    </div>
+    <div class="game-progress-bar">
+      <div class="game-progress-fill" id="gameProgressFill" style="width:0%"></div>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:var(--text3)">Klik lingkaran sebelum menghilang!</div>
+  </div>
+  <div class="float-btn-wrap">
+    <button class="float-btn waiting" id="btn2" disabled onclick="nextStep(3)">
+      <span class="timer-pill">🎮</span>
+      <span id="btnText2">Selesaikan game untuk lanjut</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     STEP 3 — Artikel Teknologi
+══════════════════════════════════════════════ -->
+<div class="step-page" id="step3">
+  <div class="article-wrap">
+    <div class="article-tag">Teknologi</div>
+    <h1 class="article-title">Mengenal Kecerdasan Buatan: Cara AI Mengubah Dunia di 2025</h1>
+    <div class="article-meta">
+      <span>📅 2025</span><span>⏱ 4 menit baca</span><span>🤖 AI & Tech</span>
+    </div>
+    <div class="article-body">
+      <p>Kecerdasan Buatan atau Artificial Intelligence (AI) bukan lagi sekadar konsep fiksi ilmiah. Di tahun 2025, AI sudah menjadi bagian dari kehidupan sehari-hari kita — dari asisten virtual di HP, rekomendasi konten di media sosial, hingga diagnosis penyakit di rumah sakit.</p>
+      <h3>Apa Itu AI Sebenarnya?</h3>
+      <p>AI adalah teknologi yang memungkinkan mesin untuk <strong>belajar dari data dan membuat keputusan</strong> layaknya manusia. Ada beberapa jenis AI yang perlu kamu ketahui:</p>
+      <ul>
+        <li><strong>Machine Learning</strong> — AI yang belajar dari pola data tanpa diprogram secara eksplisit</li>
+        <li><strong>Deep Learning</strong> — Subset ML yang meniru cara kerja neuron otak manusia</li>
+        <li><strong>Generative AI</strong> — AI yang bisa membuat konten baru (teks, gambar, musik)</li>
+        <li><strong>Computer Vision</strong> — AI yang bisa "melihat" dan menganalisis gambar</li>
+      </ul>
+      <h3>AI di Kehidupan Sehari-Hari</h3>
+      <p>Tanpa disadari, kamu sudah berinteraksi dengan AI setiap hari. Fitur Face ID di iPhone menggunakan AI untuk mengenali wajahmu. Filter Instagram yang mengubah wajahmu menggunakan computer vision. Bahkan rekomendasi video YouTube dipilih oleh algoritma AI yang menganalisis kebiasaan tontonmu.</p>
+      <h3>Masa Depan AI: Peluang & Tantangan</h3>
+      <p>AI diprediksi akan mengotomatisasi <strong>85 juta pekerjaan</strong> pada 2025, namun juga menciptakan 97 juta pekerjaan baru. Kuncinya adalah adaptasi — mereka yang bisa bekerja berdampingan dengan AI akan memiliki keunggulan kompetitif yang besar.</p>
+      <p>Bagi kamu yang ingin berkarir di bidang AI, mulailah belajar Python, matematika (aljabar linear & statistik), dan platform seperti TensorFlow atau PyTorch. Banyak kursus gratis tersedia di Coursera, edX, dan YouTube.</p>
+    </div>
+  </div>
+  <div class="float-btn-wrap">
+    <button class="float-btn waiting" id="btn3" disabled onclick="nextStep(4)">
+      <span class="timer-pill" id="timer3">⏳ 12</span>
+      <span id="btnText3">Lanjutkan</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     STEP 4 — Artikel Tips Produktivitas
+══════════════════════════════════════════════ -->
+<div class="step-page" id="step4">
+  <div class="article-wrap">
+    <div class="article-tag">Produktivitas</div>
+    <h1 class="article-title">7 Kebiasaan Orang Produktif yang Bisa Kamu Tiru Mulai Hari Ini</h1>
+    <div class="article-meta">
+      <span>📅 2025</span><span>⏱ 3 menit baca</span><span>💪 Self-Improvement</span>
+    </div>
+    <div class="article-body">
+      <p>Produktivitas bukan soal bekerja lebih keras, tapi bekerja lebih <strong>cerdas</strong>. Orang-orang sukses di dunia — dari Elon Musk hingga Bill Gates — memiliki kebiasaan terstruktur yang membantu mereka menghasilkan output luar biasa setiap harinya.</p>
+      <h3>1. Deep Work: Fokus Tanpa Gangguan</h3>
+      <p>Cal Newport, penulis buku "Deep Work", mengatakan bahwa kemampuan untuk fokus pada pekerjaan kognitif yang kompleks tanpa distraksi adalah keterampilan paling berharga di abad 21. Matikan notifikasi, tutup tab yang tidak perlu, dan dedikasikan 90 menit penuh untuk satu tugas.</p>
+      <h3>2. Aturan 2 Menit</h3>
+      <p>Jika sebuah tugas bisa diselesaikan dalam 2 menit atau kurang, <strong>lakukan sekarang juga</strong>. Jangan menunda hal-hal kecil yang justru menumpuk dan menciptakan mental burden.</p>
+      <h3>3. Time Blocking</h3>
+      <p>Jadwalkan setiap aktivitas dalam blok waktu spesifik di kalender. Ini mencegah pekerjaan "melebar" melampaui batas waktu yang seharusnya (Hukum Parkinson).</p>
+      <h3>4. Ritual Pagi yang Konsisten</h3>
+      <p>Mulai hari dengan ritual yang sama setiap pagi — olahraga ringan, meditasi 10 menit, atau menulis 3 hal yang disyukuri. Ini mengaktifkan prefrontal cortex dan mempersiapkan otak untuk berpikir jernih.</p>
+      <ul>
+        <li>Bangun di jam yang sama setiap hari (termasuk weekend)</li>
+        <li>Hindari scrolling HP dalam 30 menit pertama setelah bangun</li>
+        <li>Sarapan dengan nutrisi yang cukup untuk energi otak</li>
+      </ul>
+      <h3>5. Review Mingguan</h3>
+      <p>Setiap akhir minggu, evaluasi: apa yang sudah dicapai, apa yang belum, dan apa yang perlu diperbaiki. Refleksi rutin membantu kamu terus berkembang dan tidak jalan di tempat.</p>
+    </div>
+  </div>
+  <div class="float-btn-wrap">
+    <button class="float-btn waiting" id="btn4" disabled onclick="nextStep(5)">
+      <span class="timer-pill" id="timer4">⏳ 12</span>
+      <span id="btnText4">Hampir sampai!</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     STEP 5 — Mini Game 2
+══════════════════════════════════════════════ -->
+<div class="step-page" id="step5">
+  <div class="game-wrap">
+    <div class="article-tag">Round 2</div>
+    <div class="game-title">Klik Lebih Cepat! ⚡</div>
+    <div class="game-sub">Satu lagi! Kumpulkan <strong id="gameTarget2">12</strong> poin untuk lanjut ke tahap terakhir.</div>
+    <div class="game-arena">
+      <div class="game-score-bar">
+        <span>Skor: <strong id="gameScore2">0</strong></span>
+        <span id="gameStatus2">Siap?</span>
+      </div>
+      <div class="game-field" id="gameField2" onclick="handleMiss2(event)"></div>
+    </div>
+    <div class="game-progress-bar">
+      <div class="game-progress-fill" id="gameProgressFill2" style="width:0%"></div>
+    </div>
+  </div>
+  <div class="float-btn-wrap">
+    <button class="float-btn waiting" id="btn5" disabled onclick="nextStep(6)">
+      <span class="timer-pill">🎮</span>
+      <span id="btnText5">Selesaikan game untuk lanjut</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     STEP 6 — Artikel terakhir sebelum konten
+══════════════════════════════════════════════ -->
+<div class="step-page" id="step6">
+  <div class="article-wrap">
+    <div class="article-tag">Tips Internet</div>
+    <h1 class="article-title">Cara Cerdas Mengelola File Digital agar Tidak Berantakan</h1>
+    <div class="article-meta">
+      <span>📅 2025</span><span>⏱ 2 menit baca</span><span>📁 Manajemen File</span>
+    </div>
+    <div class="article-body">
+      <p>Punya ribuan file di folder Downloads tanpa nama yang jelas? Kamu tidak sendirian. Manajemen file yang buruk bisa membuang waktu berjam-jam untuk mencari dokumen penting. Berikut cara mengatasinya.</p>
+      <h3>Sistem Penamaan yang Konsisten</h3>
+      <p>Gunakan format: <strong>TANGGAL_KATEGORI_NAMA</strong>. Contoh: <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px">2025-03_Laporan_BulananQ1</code>. Dengan format ini, file otomatis tersortir berdasarkan tanggal.</p>
+      <h3>Struktur Folder yang Jelas</h3>
+      <ul>
+        <li><strong>📁 Inbox</strong> — File baru yang belum diorganisir</li>
+        <li><strong>📁 Proyek Aktif</strong> — File yang sedang dikerjakan</li>
+        <li><strong>📁 Arsip</strong> — File selesai, diorganisir per tahun</li>
+        <li><strong>📁 Referensi</strong> — File yang sering dibutuhkan tapi tidak diubah</li>
+      </ul>
+      <h3>Cloud Backup Otomatis</h3>
+      <p>Manfaatkan Google Drive, iCloud, atau OneDrive untuk backup otomatis. Atur agar folder penting ter-sync secara real-time. Dengan begitu, kamu tidak perlu khawatir kehilangan file penting akibat kerusakan perangkat.</p>
+      <p>Luangkan 10 menit setiap Jumat untuk "digital decluttering" — hapus file duplikat, pindahkan file dari Inbox ke folder yang tepat, dan kosongkan Trash.</p>
+      <p style="background:var(--accent-s);border:1px solid rgba(245,166,35,0.3);border-radius:10px;padding:14px;color:var(--text)">
+        🎉 <strong>Selamat!</strong> Kamu sudah melewati semua tahap. Konten yang kamu cari sudah siap di bawah!
+      </p>
+    </div>
+  </div>
+  <div class="float-btn-wrap">
+    <button class="float-btn waiting" id="btn6" disabled onclick="showFinalReveal()">
+      <span class="timer-pill" id="timer6">⏳ 10</span>
+      <span id="btnText6">Ambil Konten</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     FINAL REVEAL — Konten sebenarnya
+══════════════════════════════════════════════ -->
+<div class="step-page" id="stepFinal">
+  <div class="reveal-wrap-new">
+    <div class="confetti" id="revealEmoji">🎉</div>
+    <div class="reveal-title" id="revealTitle">Konten Siap!</div>
+    <div class="reveal-sub" id="revealSub">Berhasil! Ini yang kamu cari 👇</div>
+
+    <div class="content-reveal-box" id="contentBox">
+      <div class="content-reveal-label" id="contentLabel">Konten</div>
+      <div class="content-reveal-text" id="contentDisplay">Memuat...</div>
+    </div>
+
+    <button class="btn-get" id="btnGetFile" style="display:none">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Download File
+    </button>
+    <button class="btn-get" id="btnOpenUrl" style="display:none">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
+      Buka Link
+    </button>
+    <button class="btn-copy" id="btnCopyText" style="display:none" onclick="doCopy()">
+      📋 Salin Teks / Kode
+    </button>
+
+    <div style="text-align:center;margin-top:20px">
+      <a href="/" style="font-size:12px;color:var(--text3)">← Kembali ke SafeLink Pro</a>
+    </div>
   </div>
 </div>
 
 <div class="toasts" id="toasts"></div>
 <script src="/js/main.js"></script>
 <script>
-const linkId = getParam('id') || location.pathname.split('/l/')[1];
+// ─── STATE ───────────────────────────────────
+const TOTAL_STEPS = 6;
+let currentStep = 1;
 let linkData = null;
-let totalSeconds = 15;
-let elapsed = 0;
-let timer = null;
+const linkId = getParam('id') || location.pathname.split('/l/')[1];
 
-if (!linkId) {
-  document.getElementById('linkTitle').textContent = 'Link tidak valid';
-  document.getElementById('linkSub').textContent = 'ID tidak ditemukan';
-} else {
-  loadLink();
+// Timer configs per step (detik)
+const TIMERS = { 1:12, 3:12, 4:12, 6:10 };
+// Steps yang pakai game: 2, 5
+// Steps yang pakai timer: 1, 3, 4, 6
+
+// ─── INIT ────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  buildTrack();
+  updateTrack(1);
+  if (!linkId) { showError('Link tidak valid'); return; }
+
+  // Track klik
+  fetch('/api/click', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id:linkId}) });
+
+  try {
+    const r = await fetch(`/api/link?id=${linkId}`);
+    if (!r.ok) throw new Error('not found');
+    linkData = await r.json();
+    if (linkData.title) document.title = linkData.title + ' — SafeLink Pro';
+  } catch(e) {
+    showError('Link tidak ditemukan atau sudah kadaluarsa');
+    return;
+  }
+
+  // Buka Adsterra Smartlink
+  // window.open('URL_ADSTERRA_KAMU', '_blank');
+
+  startTimerForStep(1);
+});
+
+function showError(msg) {
+  document.querySelector('#step1 .article-title').textContent = msg;
+  document.querySelector('#step1 .article-body').innerHTML = `<p style="color:var(--text2)">Silakan periksa link yang kamu gunakan atau hubungi pembagi link ini.</p>`;
 }
 
-async function loadLink() {
-  try {
-    // Track klik
-    fetch('/api/click', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: linkId })
-    });
-
-    const r = await fetch(`/api/link?id=${linkId}`);
-    if (!r.ok) throw new Error('Not found');
-    linkData = await r.json();
-
-    // Set icon dan judul
-    const icons = { url: '🔗', file: '📦', text: '📝' };
-    document.getElementById('linkIcon').textContent = icons[linkData.type] || '🔗';
-    document.getElementById('linkTitle').textContent = linkData.title || 'Konten Terkunci';
-    document.getElementById('linkSub').textContent = linkData.desc || 'Tunggu countdown selesai untuk melanjutkan';
-    document.title = (linkData.title || 'Konten') + ' — SafeLink Pro';
-
-    // Set timer
-    totalSeconds = linkData.countdown || 15;
-    document.getElementById('timerNum').textContent = totalSeconds;
-
-    startCountdown();
-  } catch(e) {
-    document.getElementById('linkTitle').textContent = 'Link tidak ditemukan';
-    document.getElementById('linkSub').textContent = 'Link mungkin sudah kadaluarsa atau tidak valid';
-    document.getElementById('timerNum').textContent = '—';
+// ─── PROGRESS TRACK ──────────────────────────
+function buildTrack() {
+  const track = document.getElementById('stepsTrack');
+  track.innerHTML = '';
+  for (let i = 1; i <= TOTAL_STEPS; i++) {
+    const d = document.createElement('div');
+    d.className = 'step-dot';
+    d.id = 'dot' + i;
+    track.appendChild(d);
   }
 }
 
-function startCountdown() {
-  elapsed = 0;
-  timer = setInterval(() => {
-    elapsed++;
-    const remaining = totalSeconds - elapsed;
-    const pct = Math.min((elapsed / totalSeconds) * 100, 100);
+function updateTrack(step) {
+  document.getElementById('stepCounter').textContent = step + '/' + TOTAL_STEPS;
+  for (let i = 1; i <= TOTAL_STEPS; i++) {
+    const d = document.getElementById('dot' + i);
+    d.className = 'step-dot';
+    if (i < step) d.classList.add('done');
+    else if (i === step) d.classList.add('active');
+  }
+}
 
-    document.getElementById('timerNum').textContent = Math.max(remaining, 0);
-    document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('progressPct').textContent = Math.floor(pct) + '%';
+// ─── STEP NAVIGATION ─────────────────────────
+function nextStep(n) {
+  // Deactivate current
+  document.getElementById('step' + currentStep).classList.remove('active');
+  // Activate next
+  currentStep = n;
+  if (n > TOTAL_STEPS) {
+    showFinalReveal(); return;
+  }
+  document.getElementById('step' + n).classList.add('active');
+  updateTrack(n);
+  window.scrollTo(0,0);
 
-    if (elapsed >= totalSeconds) {
-      clearInterval(timer);
-      const btn = document.getElementById('continueBtn');
-      btn.disabled = false;
-      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg> Lanjutkan`;
-      btn.classList.add('ready');
-      document.getElementById('progressFill').style.transition = 'none';
-      showToast('Siap! Klik lanjutkan sekarang 🎉', 'ok');
+  // Buka iklan setiap ganti step
+  // window.open('URL_ADSTERRA_KAMU', '_blank');
+
+  // Start appropriate interaction
+  if (n === 2) startGame1();
+  else if (n === 5) startGame2();
+  else if (TIMERS[n]) startTimerForStep(n);
+}
+
+// ─── TIMER ───────────────────────────────────
+function startTimerForStep(step) {
+  const secs = TIMERS[step];
+  if (!secs) return;
+  let remaining = secs;
+  const timerEl = document.getElementById('timer' + step);
+  const btnEl = document.getElementById('btn' + step);
+
+  const tick = setInterval(() => {
+    remaining--;
+    if (timerEl) timerEl.textContent = '⏳ ' + remaining;
+    if (remaining <= 0) {
+      clearInterval(tick);
+      btnEl.disabled = false;
+      btnEl.className = step === TOTAL_STEPS ? 'float-btn final' : 'float-btn ready';
+      if (timerEl) timerEl.textContent = step === TOTAL_STEPS ? '🎁' : '✓';
+      const textEl = document.getElementById('btnText' + step);
+      if (textEl) {
+        if (step === TOTAL_STEPS) textEl.textContent = 'Ambil Konten Sekarang!';
+        else textEl.textContent = 'Lanjutkan →';
+      }
     }
   }, 1000);
 }
 
-async function doReveal() {
-  if (!linkData) return;
+// ─── GAME 1 ──────────────────────────────────
+let gameScore1 = 0;
+const GAME1_TARGET = 10;
+let gameTimer1 = null;
 
-  // Cek password jika ada
-  if (linkData.hasPassword) {
-    const pw = prompt('Masukkan password untuk konten ini:');
-    if (!pw) return;
-    const r2 = await fetch(`/api/link?id=${linkId}&pw=${encodeURIComponent(pw)}`);
-    if (!r2.ok) { showToast('Password salah!', 'err'); return; }
-    const d2 = await r2.json();
-    if (!d2.unlocked) { showToast('Password salah!', 'err'); return; }
-    linkData = d2;
+function startGame1() {
+  gameScore1 = 0;
+  updateGame1Score();
+  spawnTarget1();
+}
+
+function spawnTarget1() {
+  const field = document.getElementById('gameField');
+  if (!field) return;
+  const existing = field.querySelector('.click-target');
+  if (existing) existing.remove();
+  if (gameScore1 >= GAME1_TARGET) return;
+
+  const size = 55 + Math.random() * 30;
+  const maxX = field.clientWidth - size - 10;
+  const maxY = field.clientHeight - size - 10;
+  const x = 10 + Math.random() * maxX;
+  const y = 10 + Math.random() * maxY;
+  const emojis = ['🎯','⭐','💥','🎪','🔥'];
+
+  const target = document.createElement('div');
+  target.className = 'click-target';
+  target.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px`;
+  target.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+  target.onclick = (e) => { e.stopPropagation(); hitTarget1(target); };
+  field.appendChild(target);
+
+  // Auto disappear after 1.8s
+  gameTimer1 = setTimeout(() => {
+    if (target.parentNode) {
+      target.style.animation = 'none'; target.style.opacity='0'; target.style.transition='opacity .2s';
+      setTimeout(() => { target.remove(); if(gameScore1 < GAME1_TARGET) spawnTarget1(); }, 200);
+    }
+  }, 1800);
+}
+
+function hitTarget1(el) {
+  clearTimeout(gameTimer1);
+  el.remove();
+  gameScore1++;
+  updateGame1Score();
+  if (gameScore1 >= GAME1_TARGET) {
+    document.getElementById('gameStatus').textContent = '🎉 Berhasil!';
+    const btn = document.getElementById('btn2');
+    btn.disabled = false; btn.className = 'float-btn ready';
+    document.getElementById('btnText2').textContent = 'Lanjutkan →';
+  } else {
+    spawnTarget1();
   }
+}
 
-  // Redirect ke reveal page
-  sessionStorage.setItem('reveal_' + linkId, JSON.stringify(linkData));
-window.open('https://www.effectivegatecpm.com/cvtdw3esn0?key=533d2747d1d83a2e70d1acaf8fb03d8f', '_blank');
-setTimeout(() => { location.href = '/reveal.html?id=' + linkId; }, 500);
+function handleMiss(e) {
+  const miss = document.createElement('div');
+  miss.className = 'click-miss'; miss.textContent = '💨';
+  miss.style.cssText = `left:${e.offsetX-10}px;top:${e.offsetY-10}px`;
+  e.currentTarget.appendChild(miss);
+  setTimeout(() => miss.remove(), 500);
+}
+
+function updateGame1Score() {
+  document.getElementById('gameScore').textContent = gameScore1;
+  document.getElementById('gameProgressFill').style.width = (gameScore1/GAME1_TARGET*100) + '%';
+  document.getElementById('gameStatus').textContent = `${gameScore1}/${GAME1_TARGET} poin`;
+}
+
+// ─── GAME 2 ──────────────────────────────────
+let gameScore2 = 0;
+const GAME2_TARGET = 12;
+let gameTimer2 = null;
+
+function startGame2() {
+  gameScore2 = 0;
+  updateGame2Score();
+  spawnTarget2();
+}
+
+function spawnTarget2() {
+  const field = document.getElementById('gameField2');
+  if (!field) return;
+  const existing = field.querySelector('.click-target');
+  if (existing) existing.remove();
+  if (gameScore2 >= GAME2_TARGET) return;
+
+  const size = 45 + Math.random() * 25; // lebih kecil & cepat
+  const maxX = field.clientWidth - size - 10;
+  const maxY = field.clientHeight - size - 10;
+  const x = 10 + Math.random() * maxX;
+  const y = 10 + Math.random() * maxY;
+  const emojis = ['⚡','🌟','💎','🚀','🎯'];
+
+  const target = document.createElement('div');
+  target.className = 'click-target';
+  target.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px`;
+  target.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+  target.onclick = (e) => { e.stopPropagation(); hitTarget2(target); };
+  field.appendChild(target);
+
+  gameTimer2 = setTimeout(() => {
+    if (target.parentNode) {
+      target.style.opacity='0'; target.style.transition='opacity .15s';
+      setTimeout(() => { target.remove(); if(gameScore2 < GAME2_TARGET) spawnTarget2(); }, 150);
+    }
+  }, 1400); // lebih cepat dari game 1
+}
+
+function hitTarget2(el) {
+  clearTimeout(gameTimer2);
+  el.remove();
+  gameScore2++;
+  updateGame2Score();
+  if (gameScore2 >= GAME2_TARGET) {
+    document.getElementById('gameStatus2').textContent = '🏆 Keren banget!';
+    const btn = document.getElementById('btn5');
+    btn.disabled = false; btn.className = 'float-btn ready';
+    document.getElementById('btnText5').textContent = 'Lanjutkan →';
+  } else {
+    spawnTarget2();
+  }
+}
+
+function handleMiss2(e) {
+  const miss = document.createElement('div');
+  miss.className = 'click-miss'; miss.textContent = '💨';
+  miss.style.cssText = `left:${e.offsetX-10}px;top:${e.offsetY-10}px`;
+  e.currentTarget.appendChild(miss);
+  setTimeout(() => miss.remove(), 500);
+}
+
+function updateGame2Score() {
+  document.getElementById('gameScore2').textContent = gameScore2;
+  document.getElementById('gameProgressFill2').style.width = (gameScore2/GAME2_TARGET*100) + '%';
+  document.getElementById('gameStatus2').textContent = `${gameScore2}/${GAME2_TARGET} poin`;
+}
+
+// ─── FINAL REVEAL ────────────────────────────
+function showFinalReveal() {
+  document.getElementById('step' + currentStep).classList.remove('active');
+  document.getElementById('stepFinal').classList.add('active');
+  document.getElementById('stepCounter').textContent = '✓';
+  for (let i=1;i<=TOTAL_STEPS;i++) {
+    const d = document.getElementById('dot'+i);
+    if(d) { d.className='step-dot done'; }
+  }
+  window.scrollTo(0,0);
+
+  if (!linkData) { document.getElementById('contentDisplay').textContent = 'Error: data tidak ditemukan'; return; }
+
+  const type = linkData.type;
+  const icons = { url:'🔗', file:'📦', text:'📝' };
+  const titles = { url:'Link Siap!', file:'File Siap Diunduh!', text:'Konten Tersedia!' };
+  document.getElementById('revealEmoji').textContent = icons[type] || '🎉';
+  document.getElementById('revealTitle').textContent = titles[type] || 'Berhasil!';
+
+  if (type === 'url') {
+    document.getElementById('contentLabel').textContent = 'URL Tujuan';
+    document.getElementById('contentDisplay').textContent = linkData.target;
+    const btn = document.getElementById('btnOpenUrl');
+    btn.style.display = 'flex';
+    btn.onclick = () => window.open(linkData.target, '_blank');
+    // Auto open
+    setTimeout(() => window.open(linkData.target, '_blank'), 800);
+  } else if (type === 'file') {
+    document.getElementById('contentLabel').textContent = 'Link Download';
+    document.getElementById('contentDisplay').textContent = linkData.target;
+    const btn = document.getElementById('btnGetFile');
+    btn.style.display = 'flex';
+    btn.onclick = () => { window.open(linkData.target, '_blank'); };
+    setTimeout(() => window.open(linkData.target, '_blank'), 800);
+  } else if (type === 'text') {
+    document.getElementById('contentLabel').textContent = 'Teks / Kode';
+    document.getElementById('contentDisplay').textContent = linkData.content || linkData.target;
+    document.getElementById('btnCopyText').style.display = 'flex';
+  }
+}
+
+function doCopy() {
+  const text = document.getElementById('contentDisplay').textContent;
+  copyToClipboard(text);
 }
 </script>
 </body>
