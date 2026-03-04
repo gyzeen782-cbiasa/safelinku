@@ -496,6 +496,10 @@ function nextStep(n) {
 
   // Buka iklan setiap ganti step
   window.open('https://www.effectivegatecpm.com/cvtdw3esn0?key=533d2747d1d83a2e70d1acaf8fb03d8f', '_blank');
+  // AdMaven di step tengah (3 & 5) agar tidak terlalu banyak popup sekaligus
+  if (n === 3 || n === 5) {
+    setTimeout(() => window.open('https://mploejuiashsatea.com?Txipy=1246409', '_blank'), 1500);
+  }
 
   // Start appropriate interaction
   if (n === 2) startGame1();
