@@ -418,7 +418,8 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 @media (max-width: 768px) {
   .admin-layout { grid-template-columns: 1fr; }
   .sidebar { display: none; }
-  .main-content { padding: 20px 16px; }
+  .main-content { padding: 16px 16px 100px; }
+  .mobile-admin-nav { display: flex !important; }
   .hero { padding-top: 90px; padding-bottom: 48px; }
   .hero-title { letter-spacing: -1.5px; }
   .form-row { grid-template-columns: 1fr; }
@@ -429,3 +430,25 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   .countdown-header, .progress-wrap, .ad-box, .countdown-footer { padding-left: 20px; padding-right: 20px; }
   .ad-box { margin-left: 20px; margin-right: 20px; }
 }
+
+/* ── MOBILE ADMIN NAV ── */
+.mobile-admin-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+  background: rgba(10,10,20,0.98); backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  height: 60px;
+}
+.mobile-admin-nav-items {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  height: 100%;
+}
+.mobile-admin-nav-item {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 3px; cursor: pointer;
+  color: var(--text3); transition: color .2s; border: none;
+  background: none; font-family: 'Sora', sans-serif;
+}
+.mobile-admin-nav-item.active { color: var(--accent); }
+.mobile-admin-nav-item svg { width: 20px; height: 20px; }
+.mobile-admin-nav-item span { font-size: 9px; font-weight: 600; }
