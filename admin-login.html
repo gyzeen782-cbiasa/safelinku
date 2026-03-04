@@ -34,7 +34,7 @@
 <script src="/js/main.js"></script>
 <script>
 // Jika sudah login, redirect ke admin
-if (sessionStorage.getItem('slp_admin')) {
+if (localStorage.getItem('slp_admin')) {
   location.href = '/admin.html';
 }
 
@@ -51,7 +51,7 @@ async function doLogin() {
       headers: { 'X-Admin-Password': pw }
     });
     if (r.ok) {
-      sessionStorage.setItem('slp_admin', pw);
+      localStorage.setItem('slp_admin', pw);
       showToast('Login berhasil!', 'ok');
       setTimeout(() => location.href = '/admin.html', 600);
     } else {
