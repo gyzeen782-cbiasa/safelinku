@@ -22,9 +22,16 @@ module.exports = async (req, res) => {
     let id;
     do { id = genId(7); } while (db.links[id]);
 
+    // Konversi Google Drive share link ke direct download link
+    let finalTarget = target || '';
+    if (type === 'file' && finalTarget.includes('drive.google.com')) {
+      const match = finalTarget.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (match) finalTarget = `https://drive.google.com/uc?export=download&id=${match[1]}`;
+    }
+
     db.links[id] = {
       id, title, desc: desc || '',
-      type, target: target || '',
+      type, target: finalTarget,
       content: content || '',
       countdown: Math.min(Math.max(parseInt(countdown) || 15, 5), 60),
       password: password || '',
