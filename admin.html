@@ -101,6 +101,12 @@
         <div class="form-group" id="field-target">
           <label class="form-label" id="label-target">URL Tujuan *</label>
           <input type="text" class="form-input" id="c-target" placeholder="https://..."/>
+        <div id="fileHelp" style="display:none;margin-top:8px;padding:10px 12px;background:var(--accent-s);border:1px solid rgba(245,166,35,0.25);border-radius:8px;font-size:12px;color:var(--text2);line-height:1.7">
+          📦 <strong style='color:var(--text)'>Cara upload file ZIP:</strong><br/>
+          1. Upload file ke <strong style='color:var(--accent)'>Google Drive</strong> → klik kanan → "Bagikan" → ubah ke "Siapa saja yang punya link"<br/>
+          2. Klik "Salin link" → paste di kolom ini<br/>
+          3. Link akan otomatis dikonversi ke link download langsung ✓
+        </div>
         </div>
         <div class="form-group" id="field-text" style="display:none">
           <label class="form-label">Teks / Konten *</label>
@@ -258,10 +264,16 @@ async function loadLinks() {
 // ── CREATE ──
 function updateTypeUI() {
   const type = document.getElementById('c-type').value;
-  const labels = { url: 'URL Tujuan *', file: 'URL File / Download *', text: '' };
+  const labels = { url: 'URL Tujuan *', file: 'Link Google Drive File/ZIP *', text: '' };
   document.getElementById('label-target').textContent = labels[type] || 'Target *';
   document.getElementById('field-target').style.display = type === 'text' ? 'none' : 'block';
   document.getElementById('field-text').style.display = type === 'text' ? 'block' : 'none';
+  const help = document.getElementById('fileHelp');
+  if (help) help.style.display = type === 'file' ? 'block' : 'none';
+  const tgt = document.getElementById('c-target');
+  if (type === 'url') tgt.placeholder = 'https://example.com';
+  else if (type === 'file') tgt.placeholder = 'https://drive.google.com/file/d/...';
+  else tgt.placeholder = '';
 }
 
 async function createLink() {
