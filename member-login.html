@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Member Login — SafeLink Pro</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(245,166,35,.3)} 70%{box-shadow:0 0 0 14px rgba(245,166,35,0)} }
+
+    body { min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:20px; }
+
+    .login-wrap-m { max-width:420px; margin:0 auto; width:100%; }
+
+    .login-hero { text-align:center; padding:16px 0 28px; }
+    .login-fox { font-size:52px; display:block; margin-bottom:12px; animation:float 3s ease-in-out infinite; }
+    .login-title { font-size:24px; font-weight:800; margin-bottom:5px; letter-spacing:-0.5px; }
+    .login-sub { font-size:13px; color:var(--text2); line-height:1.6; }
+
+    .login-card-m {
+      background:var(--bg2); border:1px solid var(--border);
+      border-radius:20px; padding:24px; margin-bottom:14px;
+    }
+
+    .method-tabs {
+      display:flex; gap:4px; background:var(--bg3); padding:4px;
+      border-radius:12px; margin-bottom:20px;
+    }
+    .method-tab {
+      flex:1; padding:10px; text-align:center; border-radius:8px;
+      cursor:pointer; font-size:13px; font-weight:600; color:var(--text2);
+      border:none; background:none; transition:all .2s; font-family:'Sora',sans-serif;
+    }
+    .method-tab.active { background:var(--bg2); color:var(--text); box-shadow:0 1px 6px rgba(0,0,0,.4); }
+
+    .btn-google-m {
+      width:100%; padding:13px; background:#fff; border:none; border-radius:12px;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      font-size:14px; font-weight:700; color:#1f1f1f; cursor:pointer;
+      transition:all .2s; box-shadow:0 2px 8px rgba(0,0,0,.15); font-family:'Sora',sans-serif;
+      margin-bottom:10px;
+    }
+    .btn-google-m:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(0,0,0,.2); }
+    .btn-google-m svg { width:20px; height:20px; flex-shrink:0; }
+
+    .or-line { display:flex; align-items:center; gap:12px; margin:16px 0; color:var(--text3); font-size:12px; }
+    .or-line::before,.or-line::after { content:''; flex:1; height:1px; background:var(--border); }
+
+    .inp { margin-bottom:14px; }
+    .inp label { display:block; font-size:11px; color:var(--text2); font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+    .inp input { width:100%; background:var(--bg3); border:1.5px solid var(--border2); border-radius:11px; padding:12px 14px; color:var(--text); font-size:14px; outline:none; transition:border-color .2s; font-family:'Sora',sans-serif; }
+    .inp input:focus { border-color:var(--accent); }
+    .inp input.err { border-color:var(--red); }
+
+    .btn-submit {
+      width:100%; padding:14px; background:var(--accent); border:none; border-radius:12px;
+      color:#000; font-size:14px; font-weight:800; cursor:pointer; transition:all .2s;
+      font-family:'Sora',sans-serif; animation:pulse 2.5s infinite;
+      box-shadow:0 4px 20px var(--accent-g);
+    }
+    .btn-submit:hover { background:#d4901f; animation:none; transform:translateY(-2px); }
+    .btn-submit:disabled { opacity:.6; cursor:not-allowed; animation:none; transform:none; }
+
+    .note-m { font-size:11px; color:var(--text3); text-align:center; margin-top:10px; line-height:1.7; }
+
+    .feats-m { display:flex; flex-direction:column; gap:8px; }
+    .feat-m {
+      display:flex; align-items:center; gap:12px; padding:14px 16px;
+      background:var(--bg2); border:1px solid var(--border); border-radius:14px;
+    }
+    .feat-m-ico { font-size:22px; flex-shrink:0; }
+    .feat-m-txt { font-size:13px; font-weight:600; }
+    .feat-m-sub { font-size:11px; color:var(--text2); margin-top:2px; }
+
+    .back-link { display:block; text-align:center; margin-top:20px; font-size:12px; color:var(--text3); }
+    .back-link:hover { color:var(--accent); }
+
+    /* Google One Tap hidden */
+    #g_id_onload { display:none; }
+  </style>
+</head>
+<body>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="login-wrap-m anim">
+  <div class="login-hero">
+    <span class="login-fox">🦊</span>
+    <div class="login-title">Masuk ke SafeLink</div>
+    <div class="login-sub">Upload file & teks tersembunyi<br/>secara gratis, mudah, dan aman</div>
+  </div>
+
+  <div class="login-card-m">
+    <div class="method-tabs">
+      <button class="method-tab active" id="tabGoogle" onclick="switchTab('google')">🔵 Google</button>
+      <button class="method-tab" id="tabEmail" onclick="switchTab('email')">📧 Email</button>
+    </div>
+
+    <!-- Google Section -->
+    <div id="googleSection">
+      <button class="btn-google-m" onclick="triggerGoogle()">
+        <svg viewBox="0 0 24 24">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Lanjutkan dengan Google
+      </button>
+      <!-- Google One Tap -->
+      <div id="g_id_onload"
+        data-client_id="GOOGLE_CLIENT_ID_PLACEHOLDER"
+        data-callback="handleGoogleCredential"
+        data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin" data-type="standard" style="display:none" id="gSigninBtn"></div>
+      <p class="note-m">Akan membuka popup login Google</p>
+    </div>
+
+    <!-- Email Section -->
+    <div id="emailSection" style="display:none">
+      <div class="inp">
+        <label>Nama</label>
+        <input type="text" id="nameIn" placeholder="Nama kamu" oninput="this.classList.remove('err')" onkeydown="if(event.key==='Enter')doEmailLogin()"/>
+      </div>
+      <div class="inp">
+        <label>Email</label>
+        <input type="email" id="emailIn" placeholder="email@contoh.com" oninput="this.classList.remove('err')" onkeydown="if(event.key==='Enter')doEmailLogin()"/>
+      </div>
+      <div class="inp">
+        <label>Password</label>
+        <input type="password" id="passIn" placeholder="Password kamu (min 6 karakter)" oninput="this.classList.remove('err')" onkeydown="if(event.key==='Enter')doEmailLogin()"/>
+      </div>
+      <button class="btn-submit" id="submitBtn" onclick="doEmailLogin()">Masuk / Daftar</button>
+      <p class="note-m">Data disimpan lokal di perangkat kamu 🔒</p>
+    </div>
+  </div>
+
+  <div class="feats-m">
+    <div class="feat-m">
+      <span class="feat-m-ico">📦</span>
+      <div>
+        <div class="feat-m-txt">Upload File & ZIP</div>
+        <div class="feat-m-sub">Kunci file di balik halaman iklan</div>
+      </div>
+    </div>
+    <div class="feat-m">
+      <span class="feat-m-ico">📝</span>
+      <div>
+        <div class="feat-m-txt">Sembunyikan Teks</div>
+        <div class="feat-m-sub">Password, kode, atau teks rahasia apapun</div>
+      </div>
+    </div>
+    <div class="feat-m">
+      <span class="feat-m-ico">🔗</span>
+      <div>
+        <div class="feat-m-txt">Short Link Otomatis</div>
+        <div class="feat-m-sub">Dapat shortlink siap dibagikan</div>
+      </div>
+    </div>
+  </div>
+
+  <a href="/" class="back-link">← Kembali ke Beranda</a>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<script src="/js/main.js"></script>
+<script>
+// ─── Cek kalau sudah login ─────────────────────
+const memberUser = JSON.parse(localStorage.getItem('slp_member') || 'null');
+if (memberUser) location.href = '/member.html';
+
+// ─── Tab switch ────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('googleSection').style.display = tab === 'google' ? 'block' : 'none';
+  document.getElementById('emailSection').style.display  = tab === 'email'  ? 'block' : 'none';
+  document.getElementById('tabGoogle').classList.toggle('active', tab === 'google');
+  document.getElementById('tabEmail').classList.toggle('active', tab === 'email');
+}
+
+// ─── Google Login ──────────────────────────────
+function triggerGoogle() {
+  // Gunakan Google One Tap / redirect
+  if (window.google && window.google.accounts) {
+    google.accounts.id.prompt();
+  } else {
+    showToast('Google belum siap, coba Email dulu', 'err');
+  }
+}
+
+window.handleGoogleCredential = function(response) {
+  try {
+    const parts = response.credential.split('.');
+    const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+    finishLogin({
+      name: payload.name || payload.given_name || 'Pengguna Google',
+      email: payload.email || '',
+      avatar: payload.picture || '',
+      method: 'google',
+      loginAt: Date.now()
+    });
+  } catch(e) { showToast('Login Google gagal: ' + e.message, 'err'); }
+};
+
+function initGoogle() {
+  if (!window.google) return;
+  try {
+    google.accounts.id.initialize({
+      // Client ID harus diisi di sini atau lewat env — untuk sekarang skip Google
+      client_id: 'GOOGLE_CLIENT_ID_PLACEHOLDER',
+      callback: handleGoogleCredential,
+      auto_select: false
+    });
+  } catch(e) {}
+}
+window.addEventListener('load', initGoogle);
+
+// ─── Email Login ───────────────────────────────
+function doEmailLogin() {
+  const name  = document.getElementById('nameIn').value.trim();
+  const email = document.getElementById('emailIn').value.trim();
+  const pass  = document.getElementById('passIn').value;
+
+  let ok = true;
+  if (!name)  { document.getElementById('nameIn').classList.add('err'); ok = false; }
+  if (!email || !email.includes('@')) { document.getElementById('emailIn').classList.add('err'); ok = false; }
+  if (pass.length < 6) { document.getElementById('passIn').classList.add('err'); ok = false; }
+  if (!ok) { showToast('Isi semua kolom dengan benar!', 'err'); return; }
+
+  // Simpan ke localStorage (simple local auth)
+  const stored = JSON.parse(localStorage.getItem('slp_accounts') || '{}');
+
+  if (stored[email]) {
+    // Login: cek password (hash sederhana)
+    if (stored[email].passHash !== btoa(pass + email)) {
+      showToast('Password salah!', 'err');
+      document.getElementById('passIn').classList.add('err');
+      return;
+    }
+  } else {
+    // Daftar baru
+    stored[email] = { name, email, passHash: btoa(pass + email), registeredAt: Date.now() };
+    localStorage.setItem('slp_accounts', JSON.stringify(stored));
+  }
+
+  finishLogin({ name, email, avatar: '', method: 'email', loginAt: Date.now() });
+}
+
+function finishLogin(user) {
+  localStorage.setItem('slp_member', JSON.stringify(user));
+  showToast(`Selamat datang, ${user.name}! 🦊`, 'ok');
+  setTimeout(() => location.href = '/member.html', 700);
+}
+</script>
+</body>
+</html>
