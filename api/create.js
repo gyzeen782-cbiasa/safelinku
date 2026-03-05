@@ -1,11 +1,17 @@
 // api/create.js — Create new link (admin only)
-const { readDB, writeDB, genId, checkAdmin, cors } = require('./_db');
+const { readDB, writeDB, genId, checkAdmin, checkMember, cors } = require('./_db');
 
 module.exports = async (req, res) => {
   cors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  if (!checkAdmin(req)) return res.status(401).json({ error: 'Unauthorized' });
+  const isAdmin = checkAdmin(req);
+  const isMember = checkMember(req);
+  if (!isAdmin && !isMember) return res.status(401).json({ error: 'Unauthorized' });
+  
+  // Ambil member email dari header (kalau ada)
+  const memberEmail = req.headers['x-member-email'] || '';
+  const memberName  = req.headers['x-member-name'] || 'Anonymous';
 
   try {
     const { title, desc, type, target, content, countdown, password } = req.body;
@@ -30,6 +36,7 @@ module.exports = async (req, res) => {
     }
 
     db.links[id] = {
+      memberEmail, memberName,
       id, title, desc: desc || '',
       type, target: finalTarget,
       content: content || '',
