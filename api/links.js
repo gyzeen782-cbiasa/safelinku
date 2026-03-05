@@ -1,5 +1,5 @@
 // api/links.js — Get all links (admin) or public stats
-const { readDB, checkAdmin, cors } = require('./_db');
+const { readDB, checkAdmin, checkMember, cors } = require('./_db');
 
 module.exports = async (req, res) => {
   cors(res);
@@ -16,6 +16,15 @@ module.exports = async (req, res) => {
         totalLinks: allLinks.length,
         totalClicks
       });
+    }
+
+    // Member request — return all links (member filters client-side by email)
+    if (req.query.member === '1') {
+      if (!checkMember(req)) return res.status(401).json({ error: 'Unauthorized' });
+      const links = allLinks
+        .sort((a, b) => (b.created || 0) - (a.created || 0))
+        .map(({ password, content, ...l }) => ({ ...l, hasPassword: !!password }));
+      return res.status(200).json({ links });
     }
 
     // Admin request — check auth
