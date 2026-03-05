@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Dashboard Member — SafeLink Pro</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <style>
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+
+    /* Profile hero */
+    .mem-hero {
+      background:var(--bg2); border:1px solid var(--border);
+      border-radius:20px; padding:24px; text-align:center; margin-bottom:16px;
+    }
+    .mem-av {
+      width:64px; height:64px; border-radius:50%;
+      background:linear-gradient(135deg, var(--accent), var(--accent2));
+      display:flex; align-items:center; justify-content:center;
+      font-size:26px; font-weight:800; color:#000; margin:0 auto 12px;
+      box-shadow:0 4px 16px var(--accent-g);
+    }
+    .mem-av img { width:64px; height:64px; border-radius:50%; object-fit:cover; }
+    .mem-name { font-size:18px; font-weight:800; margin-bottom:3px; }
+    .mem-email { font-size:12px; color:var(--text2); margin-bottom:12px; }
+    .mem-badge {
+      display:inline-flex; align-items:center; gap:5px; padding:4px 12px;
+      background:var(--accent-s); border:1px solid rgba(245,166,35,.3);
+      border-radius:20px; font-size:11px; color:var(--accent); font-weight:700;
+    }
+
+    /* Tab bar */
+    .tab-bar-m { display:flex; gap:4px; background:var(--bg2); padding:4px; border-radius:12px; margin-bottom:20px; }
+    .tab-btn-m {
+      flex:1; padding:10px 6px; border-radius:8px; font-size:13px; font-weight:600;
+      cursor:pointer; transition:all .2s; background:none; border:none; color:var(--text2);
+      font-family:'Sora',sans-serif; text-align:center;
+    }
+    .tab-btn-m.active { background:var(--bg3); color:var(--text); }
+
+    /* Panels */
+    .panel-m { display:none; }
+    .panel-m.active { display:block; }
+
+    /* Stats */
+    .mem-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
+    .mem-stat { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center; }
+    .mem-stat-num { font-family:'JetBrains Mono',monospace; font-size:24px; font-weight:700; color:var(--accent); }
+    .mem-stat-lbl { font-size:11px; color:var(--text2); margin-top:3px; }
+
+    /* Link rows */
+    .link-card {
+      background:var(--bg2); border:1px solid var(--border); border-radius:14px;
+      padding:16px; margin-bottom:10px; transition:border-color .2s;
+    }
+    .link-card:hover { border-color:rgba(245,166,35,.3); }
+    .link-card-top { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; }
+    .link-card-icon { width:38px; height:38px; background:var(--accent-s); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+    .link-card-title { font-size:14px; font-weight:700; margin-bottom:3px; }
+    .link-card-meta { font-size:11px; color:var(--text3); }
+    .link-card-url { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent); word-break:break-all; margin-bottom:10px; background:var(--bg3); padding:8px 10px; border-radius:8px; }
+    .link-card-actions { display:flex; gap:8px; }
+    .lca-btn { padding:7px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; font-family:'Sora',sans-serif; transition:all .2s; border:none; }
+    .lca-copy { background:var(--accent-s); color:var(--accent); border:1px solid rgba(245,166,35,.3); }
+    .lca-copy:hover { background:var(--accent); color:#000; }
+    .lca-del { background:var(--red-s); color:var(--red); border:1px solid var(--red); }
+    .lca-del:hover { background:var(--red); color:#fff; }
+    .lca-open { background:var(--bg3); color:var(--text2); border:1px solid var(--border2); }
+    .lca-open:hover { border-color:var(--accent); color:var(--accent); }
+
+    /* Empty state */
+    .empty-state { text-align:center; padding:40px 20px; color:var(--text3); }
+    .empty-state div:first-child { font-size:40px; margin-bottom:12px; }
+    .empty-state p { font-size:14px; line-height:1.7; }
+  </style>
+</head>
+<body>
+<div class="orb orb-1"></div>
+
+<nav class="navbar">
+  <div class="nav-logo">Safe<span class="dot">Link</span> Pro</div>
+  <div class="nav-actions">
+    <button class="btn btn-ghost btn-sm" onclick="doLogout()">Keluar</button>
+  </div>
+</nav>
+
+<div style="padding:80px 20px 40px;max-width:600px;margin:0 auto">
+
+  <!-- Profile Hero -->
+  <div class="mem-hero anim" id="profileHero">
+    <div class="mem-av" id="memberAvatar">?</div>
+    <div class="mem-name" id="memberName">...</div>
+    <div class="mem-email" id="memberEmail">...</div>
+    <div class="mem-badge" id="memberBadge">📧 Email</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="mem-stats anim">
+    <div class="mem-stat"><div class="mem-stat-num" id="statMyLinks">0</div><div class="mem-stat-lbl">Link Saya</div></div>
+    <div class="mem-stat"><div class="mem-stat-num" id="statMyClicks">0</div><div class="mem-stat-lbl">Total Klik</div></div>
+    <div class="mem-stat"><div class="mem-stat-num" id="statMyToday">0</div><div class="mem-stat-lbl">Klik Hari Ini</div></div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar-m anim">
+    <button class="tab-btn-m active" id="tab-create" onclick="showTab('create')">➕ Buat Link</button>
+    <button class="tab-btn-m" id="tab-mylinks" onclick="showTab('mylinks')">🔗 Link Saya</button>
+  </div>
+
+  <!-- CREATE PANEL -->
+  <div class="panel-m active" id="panel-create">
+    <div class="card">
+      <div class="card-title">Buat Link Baru</div>
+      <div class="form-group">
+        <label class="form-label">Judul *</label>
+        <input type="text" class="form-input" id="c-title" placeholder="cth: Download Mod Minecraft"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Deskripsi (opsional)</label>
+        <input type="text" class="form-input" id="c-desc" placeholder="Deskripsi singkat untuk visitor"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipe Konten *</label>
+        <select class="form-input" id="c-type" onchange="updateTypeUI()">
+          <option value="url">🌐 URL / Link Redirect</option>
+          <option value="file">📦 File / Download (Google Drive)</option>
+          <option value="text">📝 Teks / Password / Kode</option>
+        </select>
+      </div>
+      <div class="form-group" id="field-target">
+        <label class="form-label" id="label-target">URL Tujuan *</label>
+        <input type="text" class="form-input" id="c-target" placeholder="https://..."/>
+        <div id="fileHelp" style="display:none;margin-top:8px;padding:10px 12px;background:var(--accent-s);border:1px solid rgba(245,166,35,0.25);border-radius:8px;font-size:12px;color:var(--text2);line-height:1.7">
+          📦 <strong style="color:var(--text)">Cara upload file ZIP:</strong><br/>
+          1. Upload ke <strong style="color:var(--accent)">Google Drive</strong> → kanan → "Bagikan" → "Siapa saja yang punya link"<br/>
+          2. Salin link → paste di sini<br/>
+          3. Otomatis jadi link download langsung ✓
+        </div>
+      </div>
+      <div class="form-group" id="field-text" style="display:none">
+        <label class="form-label">Teks / Konten *</label>
+        <textarea class="form-input" id="c-content" placeholder="Password, kode, atau teks rahasia apapun..." rows="5" style="resize:vertical"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Countdown (detik)</label>
+          <input type="number" class="form-input" id="c-countdown" value="15" min="5" max="60"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password (opsional)</label>
+          <input type="text" class="form-input" id="c-password" placeholder="Kosongkan jika tidak perlu"/>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="createLink()" id="createBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Buat Link
+      </button>
+    </div>
+
+    <!-- Result -->
+    <div class="card" id="createResult" style="margin-top:14px;display:none;border-color:rgba(245,166,35,.4)">
+      <div class="card-title">Link Berhasil Dibuat! 🎉</div>
+      <div class="form-label" style="margin-bottom:6px">Short Link</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+        <div class="form-input" id="resultUrl" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent)"></div>
+        <button class="btn btn-primary btn-sm" onclick="copyResult()">Salin</button>
+      </div>
+      <a href="#" id="resultPreview" target="_blank" class="btn btn-ghost btn-sm">Preview →</a>
+    </div>
+  </div>
+
+  <!-- MY LINKS PANEL -->
+  <div class="panel-m" id="panel-mylinks">
+    <div id="myLinksContainer">
+      <div class="empty-state">
+        <div>🔗</div>
+        <p>Memuat link kamu...</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toasts" id="toasts"></div>
+<script src="/js/main.js"></script>
+<script>
+// ─── Auth check ────────────────────────────────
+let memberUser = null;
+try { memberUser = JSON.parse(localStorage.getItem('slp_member') || 'null'); } catch(e) {}
+if (!memberUser) { location.href = '/member-login.html'; }
+
+const MEMBER_KEY = 'member123'; // Harus sama dengan MEMBER_KEY di Vercel env
+const BASE = location.origin;
+
+// ─── Init profile ──────────────────────────────
+function initProfile() {
+  if (!memberUser) return;
+  const initial = (memberUser.name || 'M')[0].toUpperCase();
+  const avEl = document.getElementById('memberAvatar');
+  if (memberUser.avatar) {
+    avEl.innerHTML = `<img src="${memberUser.avatar}" onerror="this.outerHTML='${initial}'"/>`;
+  } else {
+    avEl.textContent = initial;
+  }
+  document.getElementById('memberName').textContent = memberUser.name || 'Member';
+  document.getElementById('memberEmail').textContent = memberUser.email || '';
+  document.getElementById('memberBadge').textContent = memberUser.method === 'google' ? '🔵 Google' : '📧 Email';
+}
+
+// ─── Tab switch ────────────────────────────────
+function showTab(tab) {
+  document.querySelectorAll('.panel-m').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn-m').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'mylinks') loadMyLinks();
+}
+
+// ─── Type UI ────────────────────────────────────
+function updateTypeUI() {
+  const type = document.getElementById('c-type').value;
+  document.getElementById('field-target').style.display = type === 'text' ? 'none' : 'block';
+  document.getElementById('field-text').style.display = type === 'text' ? 'block' : 'none';
+  document.getElementById('fileHelp').style.display = type === 'file' ? 'block' : 'none';
+  const labels = { url:'URL Tujuan *', file:'Link Google Drive *', text:'' };
+  document.getElementById('label-target').textContent = labels[type] || '';
+  const placeholders = { url:'https://...', file:'https://drive.google.com/file/d/...' };
+  const tgt = document.getElementById('c-target');
+  if (tgt) tgt.placeholder = placeholders[type] || '';
+}
+
+// ─── Create link ────────────────────────────────
+async function createLink() {
+  const title    = document.getElementById('c-title').value.trim();
+  const type     = document.getElementById('c-type').value;
+  const target   = document.getElementById('c-target').value.trim();
+  const content  = document.getElementById('c-content').value.trim();
+  const countdown = parseInt(document.getElementById('c-countdown').value) || 15;
+  const password = document.getElementById('c-password').value.trim();
+  const desc     = document.getElementById('c-desc').value.trim();
+
+  if (!title) { showToast('Judul wajib diisi!', 'err'); return; }
+  if (type !== 'text' && !target) { showToast('Target URL wajib diisi!', 'err'); return; }
+  if (type === 'text' && !content) { showToast('Konten wajib diisi!', 'err'); return; }
+
+  const btn = document.getElementById('createBtn');
+  btn.textContent = 'Membuat...'; btn.disabled = true;
+
+  try {
+    const r = await fetch('/api/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Member-Key': MEMBER_KEY,
+        'X-Member-Email': memberUser.email || '',
+        'X-Member-Name': memberUser.name || ''
+      },
+      body: JSON.stringify({ title, desc, type, target, content, countdown, password })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Gagal membuat link');
+
+    const shortUrl = `${BASE}/l/${d.id}`;
+    document.getElementById('resultUrl').textContent = shortUrl;
+    document.getElementById('resultPreview').href = shortUrl;
+    document.getElementById('createResult').style.display = 'block';
+    document.getElementById('createResult').scrollIntoView({ behavior:'smooth' });
+    showToast('Link berhasil dibuat! 🎉', 'ok');
+
+    // Reset form
+    ['c-title','c-desc','c-target','c-password','c-content'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    document.getElementById('c-countdown').value = '15';
+
+    // Reload stats
+    loadMyLinks();
+  } catch(e) {
+    showToast('Gagal: ' + e.message, 'err');
+  }
+  btn.textContent = 'Buat Link'; btn.disabled = false;
+}
+
+function copyResult() { copyToClipboard(document.getElementById('resultUrl').textContent); }
+
+// ─── Load my links ─────────────────────────────
+async function loadMyLinks() {
+  const container = document.getElementById('myLinksContainer');
+  container.innerHTML = '<div class="empty-state"><div>⏳</div><p>Memuat...</p></div>';
+  try {
+    // Fetch all links, filter by member email (client-side)
+    // Kita pakai member key bukan admin key, jadi kita buat endpoint khusus
+    const r = await fetch('/api/links?member=1', {
+      headers: {
+        'X-Member-Key': MEMBER_KEY,
+        'X-Member-Email': memberUser.email || ''
+      }
+    });
+    const d = await r.json();
+    const links = (d.links || []).filter(l => l.memberEmail === memberUser.email);
+
+    // Update stats
+    const totalClicks = links.reduce((a, l) => a + (l.clicks || 0), 0);
+    const todayClicks = links.reduce((a, l) => a + (l.clicksToday || 0), 0);
+    document.getElementById('statMyLinks').textContent = links.length;
+    document.getElementById('statMyClicks').textContent = formatNum(totalClicks);
+    document.getElementById('statMyToday').textContent = formatNum(todayClicks);
+
+    if (!links.length) {
+      container.innerHTML = '<div class="empty-state"><div>🔗</div><p>Belum ada link.<br/>Buat link pertama kamu!</p></div>';
+      return;
+    }
+
+    const icons = { url:'🌐', file:'📦', text:'📝' };
+    container.innerHTML = links.map(l => {
+      const shortUrl = `${BASE}/l/${l.id}`;
+      return `<div class="link-card">
+        <div class="link-card-top">
+          <div class="link-card-icon">${icons[l.type] || '🔗'}</div>
+          <div style="flex:1;min-width:0">
+            <div class="link-card-title">${l.title || '—'}</div>
+            <div class="link-card-meta">${formatNum(l.clicks||0)} klik · ${timeAgo(l.created)}</div>
+          </div>
+        </div>
+        <div class="link-card-url">${shortUrl}</div>
+        <div class="link-card-actions">
+          <button class="lca-btn lca-copy" onclick="copyToClipboard('${shortUrl}')">Salin</button>
+          <button class="lca-btn lca-open" onclick="window.open('${shortUrl}','_blank')">Preview</button>
+          <button class="lca-btn lca-del" onclick="deleteMyLink('${l.id}')">Hapus</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state"><div>❌</div><p>Gagal memuat link</p></div>';
+  }
+}
+
+// ─── Delete my link ────────────────────────────
+async function deleteMyLink(id) {
+  if (!confirm('Hapus link ini?')) return;
+  try {
+    const r = await fetch(`/api/delete?id=${id}`, {
+      method: 'DELETE',
+      headers: {
+        'X-Member-Key': MEMBER_KEY,
+        'X-Member-Email': memberUser.email || ''
+      }
+    });
+    if (r.ok) { showToast('Link dihapus', 'ok'); loadMyLinks(); }
+    else showToast('Gagal hapus — mungkin bukan link kamu', 'err');
+  } catch(e) { showToast('Error: ' + e.message, 'err'); }
+}
+
+// ─── Logout ────────────────────────────────────
+function doLogout() {
+  if (!confirm('Yakin mau keluar?')) return;
+  localStorage.removeItem('slp_member');
+  location.href = '/member-login.html';
+}
+
+// Init
+initProfile();
+</script>
+</body>
+</html>
