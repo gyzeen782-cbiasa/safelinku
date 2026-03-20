@@ -131,167 +131,122 @@
 
 
     /* ══════════════════════════════════════
-       PIANO TILES GAME
+       WORD GAME
     ══════════════════════════════════════ */
-    .piano-wrap {
-      padding: 0; flex:1; display:flex; flex-direction:column;
-      align-items:stretch; width:100%; height:100vh;
-      background:#07070e;
+    .wg-wrap {
+      padding: 68px 20px 24px; flex:1; display:flex; flex-direction:column;
+      align-items:center; text-align:center; max-width:480px; margin:0 auto; width:100%;
     }
-    /* Top bar inside piano */
-    .piano-topbar {
-      display:flex; align-items:center; justify-content:space-between;
-      padding: 54px 16px 10px;
-      background:rgba(7,7,14,0.95);
-      border-bottom:1px solid rgba(255,255,255,0.06);
-      flex-shrink:0;
+
+    /* Theme badge & title */
+    .wg-theme { font-size:12px; font-weight:700; text-transform:uppercase;
+      letter-spacing:1.5px; color:var(--accent); margin-bottom:6px; }
+    .wg-title { font-size:20px; font-weight:800; margin-bottom:4px; }
+    .wg-sub { font-size:12px; color:var(--text2); margin-bottom:20px; line-height:1.5; }
+
+    /* Word rows */
+    .wg-words { display:flex; flex-direction:column; gap:14px; width:100%; margin-bottom:24px; }
+    .wg-word-row { display:flex; flex-direction:column; gap:6px; align-items:center; }
+    .wg-clue { font-size:11px; color:var(--text3); letter-spacing:0.3px; }
+    .wg-boxes { display:flex; gap:6px; justify-content:center; }
+    .wg-box {
+      width:42px; height:42px; border-radius:10px;
+      background:var(--bg3); border:2px solid var(--border2);
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; font-weight:800; color:var(--text);
+      transition:all .2s; font-family:'JetBrains Mono',monospace;
+      text-transform:uppercase;
     }
-    .piano-topbar-title {
-      font-size:15px; font-weight:800; letter-spacing:0.5px;
+    .wg-box.hint { background:var(--bg2); border-color:rgba(245,166,35,0.4); color:var(--accent); }
+    .wg-box.filled { background:rgba(245,166,35,0.12); border-color:var(--accent); color:var(--text); }
+    .wg-box.correct {
+      background:rgba(34,197,94,0.15); border-color:#22c55e; color:#22c55e;
+      animation:boxPop .3s cubic-bezier(.34,1.56,.64,1);
     }
-    .piano-topbar-title span { color:#f5a623; }
-    .piano-hud {
-      display:flex; gap:0; align-items:stretch;
+    .wg-box.wrong {
+      background:rgba(239,68,68,0.15); border-color:#ef4444; color:#ef4444;
+      animation:shake .3s ease;
     }
-    .piano-hud-item {
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      padding:4px 14px; border-left:1px solid rgba(255,255,255,0.07);
+    .wg-box.active-target { border-color:var(--accent); box-shadow:0 0 0 3px rgba(245,166,35,0.2); }
+    @keyframes boxPop { from{transform:scale(0.8)} to{transform:scale(1)} }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+
+    /* Word status indicator */
+    .wg-word-done { opacity:0.5; }
+    .wg-word-check {
+      width:22px; height:22px; border-radius:50%; background:#22c55e;
+      display:none; align-items:center; justify-content:center;
+      font-size:12px; color:#fff; flex-shrink:0;
     }
-    .piano-hud-item:first-child { border-left:none; }
-    .piano-hud-num {
+    .wg-word-row.done .wg-word-check { display:flex; }
+
+    /* Input area */
+    .wg-input-area {
+      width:100%; background:var(--bg2); border:1px solid var(--border);
+      border-radius:18px; padding:16px; margin-bottom:16px;
+    }
+    .wg-input-label { font-size:10px; color:var(--text3); text-transform:uppercase;
+      letter-spacing:1px; margin-bottom:10px; }
+    .wg-typed-display {
+      min-height:44px; background:var(--bg3); border:1px solid var(--border2);
+      border-radius:10px; display:flex; align-items:center; justify-content:center;
+      gap:4px; padding:6px 12px; margin-bottom:12px; flex-wrap:wrap;
+    }
+    .wg-typed-letter {
+      width:32px; height:32px; border-radius:8px;
+      background:var(--accent); color:#000; font-weight:800;
+      font-size:16px; display:flex; align-items:center; justify-content:center;
       font-family:'JetBrains Mono',monospace;
-      font-size:18px; font-weight:700; color:#f5a623; line-height:1;
+      animation:letterPop .15s cubic-bezier(.34,1.56,.64,1);
     }
-    .piano-hud-lbl {
-      font-size:9px; color:rgba(255,255,255,0.3);
-      text-transform:uppercase; letter-spacing:0.8px; margin-top:2px;
-    }
-    .piano-miss-dots { display:flex; gap:4px; justify-content:center; }
-    .miss-dot {
-      width:8px; height:8px; border-radius:50%;
-      background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2);
-      transition:all .25s;
-    }
-    .miss-dot.active {
-      background:#ef4444; border-color:#ef4444;
-      box-shadow:0 0 8px rgba(239,68,68,0.7);
-    }
+    @keyframes letterPop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
 
-    /* PROGRESS */
-    .piano-prog-wrap {
-      height:3px; background:rgba(255,255,255,0.06); flex-shrink:0;
+    /* Letter wheel */
+    .wg-wheel-wrap { position:relative; width:240px; height:240px; margin:0 auto; }
+    .wg-wheel-btn {
+      position:absolute; width:52px; height:52px; border-radius:50%;
+      background:var(--bg3); border:2px solid var(--border2);
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; font-weight:800; cursor:pointer;
+      font-family:'JetBrains Mono',monospace; color:var(--text);
+      transition:all .15s; user-select:none; text-transform:uppercase;
+      transform:translate(-50%,-50%);
     }
-    .piano-prog-fill {
-      height:100%; background:linear-gradient(90deg,#f5a623,#ff6b35);
-      transition:width .4s;
+    .wg-wheel-btn:hover, .wg-wheel-btn:active { background:var(--accent); color:#000; border-color:var(--accent); transform:translate(-50%,-50%) scale(1.1); }
+    .wg-wheel-btn.used { background:var(--bg2); color:var(--text3); border-color:var(--border); cursor:not-allowed; }
+    .wg-wheel-center {
+      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+      width:52px; height:52px; border-radius:50%; background:var(--bg3);
+      border:2px solid var(--border2); display:flex; align-items:center;
+      justify-content:center; cursor:pointer; font-size:16px;
+      transition:all .2s;
     }
+    .wg-wheel-center:hover { background:var(--red-s); border-color:var(--red); }
 
-    /* BOARD — fills remaining space */
-    .piano-board {
-      flex:1; position:relative; display:flex; flex-direction:row;
-      background:#0a0a12; overflow:hidden; touch-action:none;
+    /* Action buttons */
+    .wg-actions { display:flex; gap:8px; width:100%; }
+    .wg-submit {
+      flex:2; padding:12px; background:var(--accent); border:none; border-radius:12px;
+      font-size:14px; font-weight:800; color:#000; cursor:pointer;
+      font-family:'Sora',sans-serif; transition:all .2s;
     }
-    .piano-col {
-      flex:1; position:relative;
-      border-right:1px solid rgba(255,255,255,0.04);
+    .wg-submit:hover { transform:translateY(-2px); box-shadow:0 4px 16px var(--accent-g); }
+    .wg-submit:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
+    .wg-clear {
+      flex:1; padding:12px; background:var(--bg3); border:1px solid var(--border2);
+      border-radius:12px; font-size:14px; font-weight:600; color:var(--text2);
+      cursor:pointer; font-family:'Sora',sans-serif; transition:all .2s;
     }
-    .piano-col:last-child { border-right:none; }
+    .wg-clear:hover { border-color:var(--red); color:var(--red); }
 
-    /* Hit zone */
-    .piano-hitzone {
-      position:absolute; bottom:0; left:0; right:0; height:80px;
-      background:rgba(245,166,35,0.03);
-      border-top:2px solid rgba(245,166,35,0.2);
-      pointer-events:none; z-index:3;
+    /* Progress */
+    .wg-progress-wrap { display:flex; gap:6px; width:100%; margin-bottom:16px; }
+    .wg-progress-dot {
+      flex:1; height:5px; border-radius:4px; background:var(--bg3);
+      transition:background .4s;
     }
+    .wg-progress-dot.done { background:var(--accent); }
 
-    /* TILE */
-    .piano-tile {
-      position:absolute; left:3px; right:3px; height:90px;
-      border-radius:10px;
-      background:linear-gradient(180deg, #232336 0%, #111120 100%);
-      border:1px solid rgba(255,255,255,0.1);
-      cursor:pointer; z-index:2;
-      touch-action:manipulation;
-      transition:background .05s;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6);
-    }
-    .piano-tile.hit {
-      background:linear-gradient(180deg,#f5a623 0%,#c97d10 100%) !important;
-      box-shadow:0 0 30px rgba(245,166,35,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
-      border-color:rgba(245,166,35,0.6);
-    }
-    .piano-tile.missed {
-      background:rgba(239,68,68,0.25) !important;
-      border-color:rgba(239,68,68,0.5) !important;
-    }
-
-    /* OVERLAYS */
-    .piano-overlay {
-      position:absolute; inset:0; z-index:20;
-      background:rgba(7,7,14,0.92); backdrop-filter:blur(8px);
-      display:flex; flex-direction:column; align-items:center;
-      justify-content:center; gap:10px; padding:24px;
-    }
-    .piano-overlay-icon { font-size:48px; margin-bottom:4px; }
-    .piano-overlay-title { font-size:26px; font-weight:800; letter-spacing:-0.5px; }
-    .piano-overlay-sub { font-size:13px; color:rgba(255,255,255,0.5); text-align:center; line-height:1.6; }
-    .piano-start-btn {
-      margin-top:12px; padding:14px 40px;
-      background:#f5a623; border:none; border-radius:14px;
-      font-size:16px; font-weight:800; color:#000;
-      cursor:pointer; font-family:'Sora',sans-serif;
-      box-shadow:0 6px 28px rgba(245,166,35,0.4);
-      transition:all .2s; letter-spacing:0.3px;
-    }
-    .piano-start-btn:hover { transform:translateY(-2px); box-shadow:0 8px 36px rgba(245,166,35,0.5); }
-    .piano-start-btn:active { transform:scale(0.96); }
-
-    /* Bottom bar */
-    .piano-bottom {
-      flex-shrink:0; padding:12px 16px;
-      background:rgba(7,7,14,0.95);
-      border-top:1px solid rgba(255,255,255,0.06);
-    }
-    .piano-score-lbl {
-      font-size:11px; color:rgba(255,255,255,0.3);
-      text-align:center; margin-bottom:6px;
-    }
-
-
-    .piano-tile.hold-tile {
-      height: 160px;
-      background: linear-gradient(180deg, #1a1a3e 0%, #0d0d25 100%);
-      border: 1px solid rgba(100,120,255,0.4);
-      box-shadow: inset 0 1px 0 rgba(100,120,255,0.15), 0 4px 12px rgba(0,0,0,0.6);
-    }
-    .piano-tile.hold-tile::after {
-      content: 'HOLD';
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-      font-size: 10px; font-weight: 800; color: rgba(100,120,255,0.6);
-      letter-spacing: 2px; font-family: 'JetBrains Mono', monospace;
-    }
-    .piano-tile.hold-tile.holding {
-      background: linear-gradient(180deg,#6478ff,#3a50cc) !important;
-      box-shadow: 0 0 30px rgba(100,120,255,0.7), inset 0 1px 0 rgba(255,255,255,0.3);
-      border-color: rgba(100,120,255,0.8);
-    }
-    .hold-progress {
-      position: absolute; bottom: 8px; left: 8px; right: 8px; height: 4px;
-      background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;
-    }
-    .hold-progress-fill {
-      height: 100%; width: 0%;
-      background: linear-gradient(90deg,#6478ff,#a0b0ff);
-      border-radius: 4px; transition: width .05s linear;
-    }
-    /* Scroll fix after win */
-    .piano-wrap.game-done {
-      height: auto; overflow: visible;
-    }
-    #step2.active.game-done {
-      height: auto; overflow: visible;
-    }
 
     /* ── FINAL REVEAL ── */
     .reveal-wrap-new {
@@ -403,73 +358,17 @@
 </div>
 
 <!-- ═══════════════════════════════════════════
-     STEP 2 — Piano Tiles
+     STEP 2 — Word Puzzle
 ══════════════════════════════════════════════ -->
 <div class="step-page" id="step2">
-  <div class="piano-wrap">
-
-    <!-- TOP BAR -->
-    <div class="piano-topbar">
-      <div class="piano-topbar-title">🎹 Piano <span>Tiles</span></div>
-      <div class="piano-hud">
-        <div class="piano-hud-item">
-          <div class="piano-hud-num" id="ptScore">0</div>
-          <div class="piano-hud-lbl">Skor</div>
-        </div>
-        <div class="piano-hud-item">
-          <div class="piano-miss-dots">
-            <span class="miss-dot" id="md0"></span>
-            <span class="miss-dot" id="md1"></span>
-            <span class="miss-dot" id="md2"></span>
-          </div>
-          <div class="piano-hud-lbl">Miss</div>
-        </div>
-        <div class="piano-hud-item">
-          <div class="piano-hud-num" id="ptSpeed">1x</div>
-          <div class="piano-hud-lbl">Speed</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PROGRESS -->
-    <div class="piano-prog-wrap">
-      <div class="piano-prog-fill" id="ptProgress" style="width:0%"></div>
-    </div>
-
-    <!-- BOARD -->
-    <div class="piano-board" id="ptBoard">
-      <div class="piano-col" id="ptCol0"></div>
-      <div class="piano-col" id="ptCol1"></div>
-      <div class="piano-col" id="ptCol2"></div>
-      <div class="piano-col" id="ptCol3"></div>
-      <div class="piano-hitzone"></div>
-
-      <!-- Start overlay -->
-      <div class="piano-overlay" id="ptOverlay">
-        <div class="piano-overlay-icon">🎹</div>
-        <div class="piano-overlay-title">Piano Tiles</div>
-        <div class="piano-overlay-sub">Tap tile hitam sebelum lolos ke bawah<br/>Kumpulkan <strong style="color:#f5a623">50 poin</strong> untuk lanjut<br/>3 miss = mulai ulang</div>
-        <button class="piano-start-btn" onclick="ptStart()">▶&nbsp; Mulai</button>
-      </div>
-
-      <!-- Game Over overlay -->
-      <div class="piano-overlay" id="ptGameOver" style="display:none">
-        <div class="piano-overlay-icon">😵</div>
-        <div class="piano-overlay-title">Game Over!</div>
-        <div class="piano-overlay-sub" id="ptGoScore">Skor: 0</div>
-        <button class="piano-start-btn" onclick="ptRestart()" style="background:#ef4444;box-shadow:0 6px 28px rgba(239,68,68,0.4)">↺&nbsp; Coba Lagi</button>
-      </div>
-    </div>
-
-    <!-- BOTTOM -->
-    <div class="piano-bottom">
-      <div class="piano-score-lbl" id="ptProgressLbl">Tap tile untuk mulai · 0 / 50 poin</div>
-      <button class="float-btn waiting" id="btn2" disabled onclick="nextStep(3)" style="margin:0">
-        <span class="timer-pill">🎹</span>
-        <span id="btnText2">Selesaikan game untuk lanjut</span>
-      </button>
-    </div>
-
+  <div class="wg-wrap" id="wgWrap">
+    <!-- Diisi oleh JS -->
+  </div>
+  <div class="float-btn-wrap">
+    <button class="float-btn waiting" id="btn2" disabled onclick="nextStep(3)">
+      <span class="timer-pill">🔤</span>
+      <span id="btnText2">Tebak semua kata untuk lanjut</span>
+    </button>
   </div>
 </div>
 
@@ -678,7 +577,6 @@
 </div>
 
 <div class="toasts" id="toasts"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 <script src="/js/main.js"></script>
 <script>
 // ─── STATE ───────────────────────────────────
@@ -793,279 +691,266 @@ function startTimerForStep(step) {
   }, 1000);
 }
 
-// ─── PIANO TILES GAME ────────────────────────
-const PT_TARGET   = 50;
-const PT_COLS     = 4;
-const HOLD_DUR    = 600; // ms to hold
-const NOTE_NAMES  = ['C4','E4','G4','B4'];
+// ─── WORD PUZZLE GAME ───────────────────────
 
-let ptScore    = 0;
-let ptMiss     = 0;
-let ptRunning  = false;
-let ptSpawnTmr = null;
-let ptAnimId   = null;
-let ptTiles    = [];
-let ptSpeed    = 3;
-let ptInterval = 900;
-let ptLastCol  = -1;
-let ptBoardH   = 500;
-let ptSynth    = null;
-let ptBgLoop   = null;
+const WG_SETS = [
+  {
+    theme: '🖥️ Digital',
+    desc: 'Tebak 3 kata bertema dunia digital!',
+    words: [
+      { word: 'KODE',  clue: 'Instruksi untuk komputer',    hint: [0] },
+      { word: 'AKUN',  clue: 'Profil login pengguna',       hint: [0,3] },
+      { word: 'VIRUS', clue: 'Ancaman berbahaya di sistem', hint: [1] }
+    ],
+    letters: ['K','O','D','E','A','U','N','V','I','R','S','X']
+  },
+  {
+    theme: '📚 Edukasi',
+    desc: 'Tebak 3 kata bertema belajar & ilmu!',
+    words: [
+      { word: 'BUKU',  clue: 'Sumber ilmu yang bisa dibaca', hint: [0] },
+      { word: 'TULIS', clue: 'Menuangkan pikiran di kertas', hint: [2] },
+      { word: 'NILAI', clue: 'Angka hasil ujian',            hint: [0,4] }
+    ],
+    letters: ['B','U','K','T','L','I','S','N','A','E','M','O']
+  },
+  {
+    theme: '🌿 Alam',
+    desc: 'Tebak 3 kata bertema alam sekitar!',
+    words: [
+      { word: 'AWAN',  clue: 'Mengapung di langit biru',   hint: [0] },
+      { word: 'BUMI',  clue: 'Planet tempat kita tinggal', hint: [1] },
+      { word: 'LAUT',  clue: 'Hamparan air asin yang luas', hint: [0,3] }
+    ],
+    letters: ['A','W','N','B','U','M','I','L','T','E','O','K']
+  }
+];
 
-// ── Tone.js setup ──────────────────────────
-function ptInitAudio() {
-  if (ptSynth) return;
-  try {
-    // Piano-like synth
-    ptSynth = new Tone.PolySynth(Tone.Synth, {
-      oscillator: { type: 'triangle8' },
-      envelope: { attack: 0.02, decay: 0.3, sustain: 0.2, release: 0.8 }
-    }).toDestination();
-    ptSynth.volume.value = -6;
+let wgSet       = null;
+let wgTyped     = [];
+let wgSolved    = [];
+let wgActive    = 0; // which word is currently being solved
 
-    // Background ambient loop — simple chord pattern
-    ptBgLoop = new Tone.Sequence((time, note) => {
-      if (!ptRunning) return;
-      ptSynth.triggerAttackRelease(note, '8n', time, 0.08);
-    }, ['C3','G3','E3','G3','A2','E3','C3','G3'], '8n');
-    ptBgLoop.start(0);
-  } catch(e) { ptSynth = null; }
+function startGame1() {
+  // Pick random set
+  wgSet    = WG_SETS[Math.floor(Math.random() * WG_SETS.length)];
+  wgSolved = wgSet.words.map(() => false);
+  wgActive = wgSet.words.findIndex(w => !wgSolved[wgSet.words.indexOf(w)]);
+  wgTyped  = [];
+  wgRender();
 }
 
-function ptPlayHit(col) {
-  try {
-    if (ptSynth) {
-      ptSynth.triggerAttackRelease(NOTE_NAMES[col], '8n', Tone.now(), 0.5);
-    }
-  } catch(e) {}
+function wgRender() {
+  const wrap = document.getElementById('wgWrap');
+  if (!wrap) return;
+
+  // ── Header ──
+  let html = `
+    <div class="article-tag">${wgSet.theme}</div>
+    <div class="game-title">Tebak Kata 🔤</div>
+    <div class="game-sub">${wgSet.desc}<br/>Tebak semua kata untuk lanjut!</div>
+
+    <div class="wg-progress-wrap">
+      ${wgSet.words.map((_,i) => `<div class="wg-progress-dot${wgSolved[i]?' done':''}" id="wpd${i}"></div>`).join('')}
+    </div>
+
+    <div class="wg-words" id="wgWords">`;
+
+  // ── Word rows ──
+  wgSet.words.forEach((w, wi) => {
+    const isDone = wgSolved[wi];
+    const isActive = wi === wgActive && !isDone;
+    html += `<div class="wg-word-row${isDone?' done':''}" id="wgRow${wi}">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="wg-clue">${wi+1}. ${w.clue}</div>
+        <div class="wg-word-check" id="wgCheck${wi}">✓</div>
+      </div>
+      <div class="wg-boxes">`;
+
+    w.word.split('').forEach((letter, li) => {
+      const isHint   = w.hint.includes(li);
+      const isFilled = isDone;
+      let cls = 'wg-box';
+      if (isHint)   cls += ' hint';
+      if (isFilled) cls += ' correct';
+      if (isActive && !isHint) cls += ' active-target';
+      const show = (isHint || isFilled) ? letter : '';
+      html += `<div class="${cls}" id="wgBox${wi}_${li}">${show}</div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  html += `</div>
+
+    <div class="wg-input-area">
+      <div class="wg-input-label">Ketikkan jawaban kata #${wgActive + 1}</div>
+      <div class="wg-typed-display" id="wgTypedDisplay">
+        <span style="color:var(--text3);font-size:13px" id="wgTypedPlaceholder">Tap huruf di bawah...</span>
+      </div>
+      <div class="wg-actions">
+        <button class="wg-submit" id="wgSubmitBtn" onclick="wgSubmit()" disabled>Cek Jawaban ✓</button>
+        <button class="wg-clear" onclick="wgClear()">⌫ Hapus</button>
+      </div>
+    </div>
+
+    <div class="wg-wheel-wrap" id="wgWheel"></div>
+  `;
+
+  wrap.innerHTML = html;
+  wgRenderWheel();
 }
 
-function ptPlayMiss() {
-  try {
-    if (ptSynth) {
-      ptSynth.triggerAttackRelease('C2', '16n', Tone.now(), 0.2);
-    }
-  } catch(e) {}
+function wgRenderWheel() {
+  const wheel   = document.getElementById('wgWheel');
+  if (!wheel) return;
+  const letters = wgSet.letters;
+  const N       = letters.length;
+  const R       = 95; // radius
+  const CX      = 120, CY = 120;
+
+  let html = '';
+  letters.forEach((l, i) => {
+    const angle = (i / N) * 2 * Math.PI - Math.PI / 2;
+    const x = CX + R * Math.cos(angle);
+    const y = CY + R * Math.sin(angle);
+    html += `<button class="wg-wheel-btn" id="wgLetter_${i}"
+      style="left:${x}px;top:${y}px"
+      onclick="wgTapLetter('${l}',${i})">${l}</button>`;
+  });
+
+  // Center = delete last
+  html += `<div class="wg-wheel-center" onclick="wgDeleteLast()" title="Hapus">⌫</div>`;
+  wheel.innerHTML = html;
 }
 
-function ptPlayHold(col) {
-  try {
-    if (ptSynth) {
-      // Chord: note + octave up
-      ptSynth.triggerAttackRelease([NOTE_NAMES[col], NOTE_NAMES[col].replace(/(\d)/, n => +n+1)], '4n', Tone.now(), 0.45);
-    }
-  } catch(e) {}
+function wgTapLetter(letter, idx) {
+  if (wgSolved[wgActive]) return;
+  const target = wgSet.words[wgActive];
+  // Max length = word length
+  if (wgTyped.length >= target.word.length) return;
+
+  wgTyped.push({ letter, idx });
+  wgUpdateTyped();
 }
 
-// ── Start / Restart ────────────────────────
-function ptStart() {
-  document.getElementById('ptOverlay').style.display = 'none';
-  ptBoardH = document.getElementById('ptBoard').clientHeight || 500;
-  ptInitAudio();
-  try { if (Tone.context.state !== 'running') Tone.start(); } catch(e) {}
-  try { Tone.getTransport().bpm.value = 90; Tone.getTransport().start(); } catch(e) {}
-  ptRestart();
+function wgDeleteLast() {
+  if (!wgTyped.length) return;
+  wgTyped.pop();
+  wgUpdateTyped();
 }
 
-function ptRestart() {
-  ptScore = 0; ptMiss = 0; ptRunning = true;
-  ptSpeed = 3; ptInterval = 900; ptTiles = []; ptLastCol = -1;
-  ptBoardH = document.getElementById('ptBoard').clientHeight || 500;
-
-  for (let c = 0; c < PT_COLS; c++) document.getElementById('ptCol' + c).innerHTML = '';
-  document.getElementById('ptGameOver').style.display = 'none';
-  for (let i = 0; i < 3; i++) document.getElementById('md' + i).classList.remove('active');
-
-  // Restore scroll lock
-  const wrap = document.querySelector('.piano-wrap');
-  if (wrap) { wrap.style.height = '100vh'; wrap.style.overflow = 'hidden'; }
-
-  ptUpdateHUD();
-
-  // !! FIX BUG NUMPUK: clear dulu sebelum mulai !!
-  clearTimeout(ptSpawnTmr);
-  cancelAnimationFrame(ptAnimId);
-  ptSpawnTmr = null; ptAnimId = null;
-
-  setTimeout(() => { ptSpawnOnce(); ptLoop(); }, 300);
+function wgClear() {
+  wgTyped = [];
+  wgUpdateTyped();
 }
 
-// ── Spawn satu tile ────────────────────────
-function ptSpawnOnce() {
-  if (!ptRunning) return;
+function wgUpdateTyped() {
+  const display = document.getElementById('wgTypedDisplay');
+  const ph      = document.getElementById('wgTypedPlaceholder');
+  const submit  = document.getElementById('wgSubmitBtn');
+  if (!display) return;
 
-  // Random col, avoid repeat
-  let col, tries = 0;
-  do { col = Math.floor(Math.random() * PT_COLS); tries++; } while (col === ptLastCol && tries < 8);
-  ptLastCol = col;
+  // Non-hint letters typed so far
+  const target   = wgSet.words[wgActive];
+  const nonHints = target.word.split('').filter((_,i) => !target.hint.includes(i)).length;
 
-  // 20% chance hold tile (setelah skor > 5)
-  const isHold = ptScore > 5 && Math.random() < 0.2;
-
-  const colEl = document.getElementById('ptCol' + col);
-  if (!colEl) return;
-  const tile  = document.createElement('div');
-  tile.className = isHold ? 'piano-tile hold-tile' : 'piano-tile';
-  tile.style.top = '-' + (isHold ? 165 : 95) + 'px';
-
-  if (isHold) {
-    // Hold tile inner progress bar
-    const prog = document.createElement('div');
-    prog.className = 'hold-progress';
-    const fill = document.createElement('div');
-    fill.className = 'hold-progress-fill';
-    prog.appendChild(fill);
-    tile.appendChild(prog);
+  if (!wgTyped.length) {
+    display.innerHTML = '<span style="color:var(--text3);font-size:13px">Tap huruf di bawah...</span>';
+    if (submit) submit.disabled = true;
+    return;
   }
 
-  let resolved = false;
+  display.innerHTML = wgTyped.map(t =>
+    `<div class="wg-typed-letter">${t.letter}</div>`
+  ).join('');
 
-  if (isHold) {
-    // ── HOLD LOGIC ──────────────────────────
-    let holdStart = null;
-    let holdInterval = null;
-    let holding = false;
+  // Enable submit when typed enough for non-hint slots
+  if (submit) submit.disabled = wgTyped.length < nonHints;
+}
 
-    const onHoldStart = (e) => {
-      e.preventDefault(); e.stopPropagation();
-      if (resolved || !ptRunning) return;
-      holding = true;
-      holdStart = Date.now();
-      tile.classList.add('holding');
-      const fill = tile.querySelector('.hold-progress-fill');
-      holdInterval = setInterval(() => {
-        if (!holding) { clearInterval(holdInterval); return; }
-        const elapsed = Date.now() - holdStart;
-        const pct = Math.min(elapsed / HOLD_DUR * 100, 100);
-        if (fill) fill.style.width = pct + '%';
-        if (elapsed >= HOLD_DUR && !resolved) {
-          resolved = true;
-          clearInterval(holdInterval);
-          tile.classList.add('hit');
-          ptPlayHold(col);
-          ptScore += 3;
-          ptTiles = ptTiles.filter(t => t.el !== tile);
-          setTimeout(() => tile.remove(), 150);
-          ptUpdateHUD();
-          if (ptScore >= PT_TARGET) ptWin();
-        }
-      }, 30);
-    };
-    const onHoldEnd = (e) => {
-      if (!holding || resolved) return;
-      holding = false;
-      clearInterval(holdInterval);
-      tile.classList.remove('holding');
-      const fill = tile.querySelector('.hold-progress-fill');
-      if (fill) fill.style.width = '0%';
-    };
-    tile.addEventListener('touchstart', onHoldStart, { passive: false });
-    tile.addEventListener('touchend',   onHoldEnd,   { passive: false });
-    tile.addEventListener('mousedown',  onHoldStart);
-    tile.addEventListener('mouseup',    onHoldEnd);
-    tile.addEventListener('mouseleave', onHoldEnd);
+function wgSubmit() {
+  const target   = wgSet.words[wgActive];
+  const word     = target.word;
+  const nonHintPositions = word.split('').map((l,i) => target.hint.includes(i) ? null : i).filter(i => i !== null);
+
+  // Build full answer: fill hint positions automatically, rest from typed
+  let typedIdx = 0;
+  let answer   = '';
+  for (let i = 0; i < word.length; i++) {
+    if (target.hint.includes(i)) {
+      answer += word[i];
+    } else {
+      answer += (wgTyped[typedIdx] ? wgTyped[typedIdx].letter : '_');
+      typedIdx++;
+    }
+  }
+
+  const correct = answer.toUpperCase() === word.toUpperCase();
+
+  // Flash boxes
+  word.split('').forEach((_, li) => {
+    const box = document.getElementById(`wgBox${wgActive}_${li}`);
+    if (!box) return;
+    box.textContent = answer[li];
+    box.className = 'wg-box ' + (correct ? 'correct' : 'wrong');
+  });
+
+  if (correct) {
+    wgSolved[wgActive] = true;
+    const row = document.getElementById(`wgRow${wgActive}`);
+    if (row) row.classList.add('done');
+    const pd  = document.getElementById(`wpd${wgActive}`);
+    if (pd)  pd.classList.add('done');
+    const chk = document.getElementById(`wgCheck${wgActive}`);
+    if (chk) chk.style.display = 'flex';
+
+    wgTyped = [];
+
+    // Check win
+    if (wgSolved.every(Boolean)) {
+      setTimeout(wgWin, 600);
+      return;
+    }
+
+    // Move to next unsolved
+    setTimeout(() => {
+      wgActive = wgSolved.findIndex((v, i) => !v);
+      wgTyped  = [];
+      wgRender();
+    }, 700);
 
   } else {
-    // ── TAP LOGIC ───────────────────────────
-    const onTap = (e) => {
-      e.preventDefault(); e.stopPropagation();
-      if (resolved || !ptRunning) return;
-      resolved = true;
-      tile.classList.add('hit');
-      ptPlayHit(col);
-      ptScore++;
-      ptTiles = ptTiles.filter(t => t.el !== tile);
-      setTimeout(() => tile.remove(), 110);
-      ptUpdateHUD();
-      if (ptScore >= PT_TARGET) ptWin();
-    };
-    tile.addEventListener('touchstart', onTap, { passive: false });
-    tile.addEventListener('mousedown',  onTap);
+    // Wrong — shake then clear
+    setTimeout(() => {
+      word.split('').forEach((_, li) => {
+        const box = document.getElementById(`wgBox${wgActive}_${li}`);
+        if (box) {
+          box.className = 'wg-box' + (target.hint.includes(li) ? ' hint' : ' active-target');
+          box.textContent = target.hint.includes(li) ? word[li] : '';
+        }
+      });
+      wgTyped = [];
+      wgUpdateTyped();
+    }, 700);
   }
-
-  colEl.appendChild(tile);
-  ptTiles.push({ el: tile, col, isHold, get resolved() { return resolved; } });
-
-  // !! FIX BUG: clear lama dulu sebelum set baru !!
-  clearTimeout(ptSpawnTmr);
-  ptSpawnTmr = setTimeout(ptSpawnOnce, ptInterval);
 }
 
-// ── Animation loop ─────────────────────────
-function ptLoop() {
-  if (!ptRunning) return;
-
-  for (let i = ptTiles.length - 1; i >= 0; i--) {
-    const t = ptTiles[i];
-    if (!t.el.isConnected) { ptTiles.splice(i, 1); continue; }
-
-    const tileH = t.isHold ? 160 : 90;
-    const cur   = parseFloat(t.el.style.top) || -(tileH + 5);
-    const next  = cur + ptSpeed;
-    t.el.style.top = next + 'px';
-
-    // Miss check
-    if (next > ptBoardH && !t.resolved) {
-      t.el.classList.add('missed');
-      ptPlayMiss();
-      setTimeout(() => { if (t.el.isConnected) t.el.remove(); }, 200);
-      ptTiles.splice(i, 1);
-      ptMiss++;
-      const dot = document.getElementById('md' + Math.min(ptMiss - 1, 2));
-      if (dot) dot.classList.add('active');
-      if (ptMiss >= 3) { ptGameOver(); return; }
-    }
-  }
-
-  ptAnimId = requestAnimationFrame(ptLoop);
-}
-
-// ── HUD update ─────────────────────────────
-function ptUpdateHUD() {
-  document.getElementById('ptScore').textContent = ptScore;
-  const lvl = ptScore >= 40 ? '4x' : ptScore >= 25 ? '3x' : ptScore >= 12 ? '2x' : '1x';
-  document.getElementById('ptSpeed').textContent = lvl;
-
-  // !! FIX: update speed & interval di sini bukan di spawn !!
-  if (ptScore >= 40)      { ptSpeed = 5.5; ptInterval = 560; }
-  else if (ptScore >= 25) { ptSpeed = 4.5; ptInterval = 660; }
-  else if (ptScore >= 12) { ptSpeed = 3.8; ptInterval = 760; }
-
-  const pct = Math.min(ptScore / PT_TARGET * 100, 100);
-  document.getElementById('ptProgress').style.width = pct + '%';
-  document.getElementById('ptProgressLbl').textContent = ptScore + ' / ' + PT_TARGET + ' poin';
-}
-
-// ── Game Over ──────────────────────────────
-function ptGameOver() {
-  ptRunning = false;
-  clearTimeout(ptSpawnTmr); cancelAnimationFrame(ptAnimId);
-  try { Tone.getTransport().stop(); } catch(e) {}
-  document.getElementById('ptGoScore').textContent = 'Skor kamu: ' + ptScore + ' / ' + PT_TARGET;
-  document.getElementById('ptGameOver').style.display = 'flex';
-}
-
-// ── Win ────────────────────────────────────
-function ptWin() {
-  ptRunning = false;
-  clearTimeout(ptSpawnTmr); cancelAnimationFrame(ptAnimId);
-  try { Tone.getTransport().stop(); } catch(e) {}
-
-  // Unlock scroll
-  const wrap = document.querySelector('.piano-wrap');
-  const step = document.getElementById('step2');
-  if (wrap) { wrap.style.height = 'auto'; wrap.style.overflow = 'visible'; }
-  if (step) { step.style.height = 'auto'; step.style.overflow = 'visible'; }
-
+function wgWin() {
   const btn = document.getElementById('btn2');
-  btn.disabled = false; btn.className = 'float-btn final';
+  if (btn) { btn.disabled = false; btn.className = 'float-btn final'; }
   document.getElementById('btnText2').textContent = '🎉 Lanjutkan →';
-  document.getElementById('ptProgressLbl').textContent = '🎉 Keren banget! Kamu berhasil!';
 
-  setTimeout(() => btn.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+  const wrap = document.getElementById('wgWrap');
+  if (wrap) {
+    const win = document.createElement('div');
+    win.style.cssText = 'text-align:center;padding:16px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:16px;margin-top:16px';
+    win.innerHTML = '<div style="font-size:32px;margin-bottom:6px">🎉</div><div style="font-size:16px;font-weight:800;color:#22c55e">Semua kata benar!</div><div style="font-size:12px;color:var(--text2);margin-top:4px">Kamu berhasil menebak ' + wgSet.words.length + '/' + wgSet.words.length + ' kata</div>';
+    wrap.appendChild(win);
+    setTimeout(() => btn && btn.scrollIntoView({ behavior:'smooth', block:'center' }), 400);
+  }
 }
 
-function startGame1() { /* Piano Tiles — pakai ptStart() */ }
 
 // ─── GAME 2 ──────────────────────────────────
 let gameScore2 = 0;
