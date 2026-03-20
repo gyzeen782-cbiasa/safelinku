@@ -238,28 +238,68 @@
 </div>
 
 <!-- ═══════════════════════════════════════════
-     STEP 2 — Mini Game
+     STEP 2 — Piano Tiles
 ══════════════════════════════════════════════ -->
 <div class="step-page" id="step2">
-  <div class="game-wrap">
+  <div class="piano-wrap">
     <div class="article-tag">Mini Game</div>
-    <div class="game-title">Klik Target! 🎯</div>
-    <div class="game-sub">Klik semua lingkaran yang muncul sebelum menghilang.<br/>Kumpulkan <strong id="gameTarget">10</strong> poin untuk lanjut!</div>
-    <div class="game-arena">
-      <div class="game-score-bar">
-        <span>Skor: <strong id="gameScore">0</strong></span>
-        <span id="gameStatus">Mulai sekarang!</span>
+    <div class="game-title">Piano Tiles 🎹</div>
+    <div class="game-sub">Tap tile hitam sebelum lolos ke bawah!<br/>Kumpulkan <strong>50 poin</strong> untuk lanjut. 3 miss = mulai ulang.</div>
+
+    <!-- HUD -->
+    <div class="piano-hud">
+      <div class="piano-hud-item">
+        <div class="piano-hud-num" id="ptScore">0</div>
+        <div class="piano-hud-lbl">Skor</div>
       </div>
-      <div class="game-field" id="gameField" onclick="handleMiss(event)"></div>
+      <div class="piano-hud-item piano-hud-center">
+        <div class="piano-miss-dots" id="ptMissDots">
+          <span class="miss-dot" id="md0"></span>
+          <span class="miss-dot" id="md1"></span>
+          <span class="miss-dot" id="md2"></span>
+        </div>
+        <div class="piano-hud-lbl">Miss</div>
+      </div>
+      <div class="piano-hud-item">
+        <div class="piano-hud-num" id="ptSpeed">1x</div>
+        <div class="piano-hud-lbl">Speed</div>
+      </div>
     </div>
-    <div class="game-progress-bar">
-      <div class="game-progress-fill" id="gameProgressFill" style="width:0%"></div>
+
+    <!-- BOARD -->
+    <div class="piano-board" id="ptBoard">
+      <div class="piano-col" id="ptCol0"></div>
+      <div class="piano-col" id="ptCol1"></div>
+      <div class="piano-col" id="ptCol2"></div>
+      <div class="piano-col" id="ptCol3"></div>
+      <!-- Hit zone line -->
+      <div class="piano-hitline"></div>
+      <!-- Start overlay -->
+      <div class="piano-overlay" id="ptOverlay">
+        <div class="piano-overlay-icon">🎹</div>
+        <div class="piano-overlay-title">Piano Tiles</div>
+        <div class="piano-overlay-sub">Tap tile hitam sesuai irama</div>
+        <button class="piano-start-btn" onclick="ptStart()">▶ Mulai</button>
+      </div>
+      <!-- Game Over overlay -->
+      <div class="piano-overlay" id="ptGameOver" style="display:none">
+        <div class="piano-overlay-icon">😵</div>
+        <div class="piano-overlay-title">Game Over!</div>
+        <div class="piano-overlay-sub" id="ptGoScore">Skor: 0</div>
+        <button class="piano-start-btn" onclick="ptRestart()">↺ Coba Lagi</button>
+      </div>
     </div>
-    <div style="margin-top:12px;font-size:12px;color:var(--text3)">Klik lingkaran sebelum menghilang!</div>
+
+    <!-- Progress -->
+    <div class="game-progress-bar" style="margin-top:12px">
+      <div class="game-progress-fill" id="ptProgress" style="width:0%"></div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--text3);text-align:center" id="ptProgressLbl">0 / 50 poin</div>
   </div>
+
   <div class="float-btn-wrap">
     <button class="float-btn waiting" id="btn2" disabled onclick="nextStep(3)">
-      <span class="timer-pill">🎮</span>
+      <span class="timer-pill">🎹</span>
       <span id="btnText2">Selesaikan game untuk lanjut</span>
     </button>
   </div>
@@ -584,75 +624,170 @@ function startTimerForStep(step) {
   }, 1000);
 }
 
-// ─── GAME 1 ──────────────────────────────────
-let gameScore1 = 0;
-const GAME1_TARGET = 10;
-let gameTimer1 = null;
+// ─── PIANO TILES GAME ────────────────────────
+const PT_TARGET   = 50;
+const PT_COLS     = 4;
+const PT_TILE_H   = 70;
+const NOTES       = [261.63, 329.63, 392.00, 493.88]; // C4 E4 G4 B4
 
-function startGame1() {
-  gameScore1 = 0;
-  updateGame1Score();
-  spawnTarget1();
+let ptScore       = 0;
+let ptMiss        = 0;
+let ptRunning     = false;
+let ptSpawnTimer  = null;
+let ptAnimFrame   = null;
+let ptTiles       = [];
+let ptSpeed       = 2.2;   // px per frame
+let ptInterval    = 900;   // ms between spawns
+let ptAudioCtx    = null;
+let ptLastCol     = -1;
+
+function ptGetAudio() {
+  if (!ptAudioCtx) ptAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return ptAudioCtx;
 }
 
-function spawnTarget1() {
-  const field = document.getElementById('gameField');
-  if (!field) return;
-  const existing = field.querySelector('.click-target');
-  if (existing) existing.remove();
-  if (gameScore1 >= GAME1_TARGET) return;
-
-  const size = 55 + Math.random() * 30;
-  const maxX = field.clientWidth - size - 10;
-  const maxY = field.clientHeight - size - 10;
-  const x = 10 + Math.random() * maxX;
-  const y = 10 + Math.random() * maxY;
-  const emojis = ['🎯','⭐','💥','🎪','🔥'];
-
-  const target = document.createElement('div');
-  target.className = 'click-target';
-  target.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px`;
-  target.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-  target.onclick = (e) => { e.stopPropagation(); hitTarget1(target); };
-  field.appendChild(target);
-
-  // Auto disappear after 1.8s
-  gameTimer1 = setTimeout(() => {
-    if (target.parentNode) {
-      target.style.animation = 'none'; target.style.opacity='0'; target.style.transition='opacity .2s';
-      setTimeout(() => { target.remove(); if(gameScore1 < GAME1_TARGET) spawnTarget1(); }, 200);
-    }
-  }, 1800);
+function ptPlayNote(col, hit) {
+  try {
+    const ctx  = ptGetAudio();
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type      = 'triangle';
+    osc.frequency.value = NOTES[col] * (hit ? 1 : 0.5);
+    gain.gain.setValueAtTime(hit ? 0.35 : 0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (hit ? 0.45 : 0.2));
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.5);
+  } catch(e) {}
 }
 
-function hitTarget1(el) {
-  clearTimeout(gameTimer1);
-  el.remove();
-  gameScore1++;
-  updateGame1Score();
-  if (gameScore1 >= GAME1_TARGET) {
-    document.getElementById('gameStatus').textContent = '🎉 Berhasil!';
-    const btn = document.getElementById('btn2');
-    btn.disabled = false; btn.className = 'float-btn ready';
-    document.getElementById('btnText2').textContent = 'Lanjutkan →';
-  } else {
-    spawnTarget1();
+function ptStart() {
+  document.getElementById('ptOverlay').style.display = 'none';
+  ptRestart();
+}
+
+function ptRestart() {
+  // Reset state
+  ptScore = 0; ptMiss = 0; ptRunning = true;
+  ptSpeed = 2.2; ptInterval = 900; ptTiles = [];
+  ptLastCol = -1;
+
+  // Clear board
+  for (let c = 0; c < PT_COLS; c++) {
+    document.getElementById('ptCol' + c).innerHTML = '';
   }
+  document.getElementById('ptGameOver').style.display = 'none';
+
+  // Reset HUD
+  ptUpdateHUD();
+  for (let i = 0; i < 3; i++) document.getElementById('md' + i).classList.remove('active');
+
+  // Start loops
+  clearInterval(ptSpawnTimer);
+  cancelAnimationFrame(ptAnimFrame);
+  ptSpawnLoop();
+  ptAnimLoop();
 }
 
-function handleMiss(e) {
-  const miss = document.createElement('div');
-  miss.className = 'click-miss'; miss.textContent = '💨';
-  miss.style.cssText = `left:${e.offsetX-10}px;top:${e.offsetY-10}px`;
-  e.currentTarget.appendChild(miss);
-  setTimeout(() => miss.remove(), 500);
+function ptSpawnLoop() {
+  if (!ptRunning) return;
+  ptSpawnTile();
+  // Ramp up speed
+  if (ptScore > 10)  { ptSpeed = 2.8; ptInterval = 780; }
+  if (ptScore > 25)  { ptSpeed = 3.4; ptInterval = 680; }
+  if (ptScore > 40)  { ptSpeed = 4.0; ptInterval = 600; }
+  ptSpawnTimer = setTimeout(ptSpawnLoop, ptInterval);
 }
 
-function updateGame1Score() {
-  document.getElementById('gameScore').textContent = gameScore1;
-  document.getElementById('gameProgressFill').style.width = (gameScore1/GAME1_TARGET*100) + '%';
-  document.getElementById('gameStatus').textContent = `${gameScore1}/${GAME1_TARGET} poin`;
+function ptSpawnTile() {
+  // Pick random col, avoid same col twice in a row
+  let col;
+  do { col = Math.floor(Math.random() * PT_COLS); } while (col === ptLastCol);
+  ptLastCol = col;
+
+  const board  = document.getElementById('ptBoard');
+  const colEl  = document.getElementById('ptCol' + col);
+  const tile   = document.createElement('div');
+  tile.className = 'piano-tile';
+  tile.style.top = '-' + PT_TILE_H + 'px';
+
+  let tapped = false;
+  const tapHandler = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    if (tapped) return;
+    tapped = true;
+    tile.classList.add('hit');
+    ptPlayNote(col, true);
+    ptScore++;
+    ptUpdateHUD();
+    setTimeout(() => tile.remove(), 120);
+    // Remove from tracking
+    ptTiles = ptTiles.filter(t => t.el !== tile);
+    if (ptScore >= PT_TARGET) ptWin();
+  };
+  tile.addEventListener('touchstart', tapHandler, { passive:false });
+  tile.addEventListener('mousedown',  tapHandler);
+
+  colEl.appendChild(tile);
+  ptTiles.push({ el: tile, col, tapped: () => tapped });
 }
+
+function ptAnimLoop() {
+  if (!ptRunning) return;
+  const board    = document.getElementById('ptBoard');
+  const boardH   = board ? board.clientHeight : 420;
+  const missLine = boardH; // tile reaches bottom = miss
+
+  ptTiles.forEach((t, i) => {
+    if (!t.el.parentNode) return;
+    const cur = parseFloat(t.el.style.top) || -PT_TILE_H;
+    const next = cur + ptSpeed;
+    t.el.style.top = next + 'px';
+
+    // Missed — passed bottom without tap
+    if (next > missLine && !t.tapped()) {
+      t.el.classList.add('missed');
+      ptPlayNote(t.col, false);
+      setTimeout(() => t.el.remove(), 200);
+      ptTiles.splice(i, 1);
+      ptMiss++;
+      document.getElementById('md' + Math.min(ptMiss - 1, 2)).classList.add('active');
+      if (ptMiss >= 3) { ptGameOver(); return; }
+    }
+  });
+
+  ptAnimFrame = requestAnimationFrame(ptAnimLoop);
+}
+
+function ptUpdateHUD() {
+  document.getElementById('ptScore').textContent = ptScore;
+  const lvl = ptScore > 40 ? '4x' : ptScore > 25 ? '3x' : ptScore > 10 ? '2x' : '1x';
+  document.getElementById('ptSpeed').textContent = lvl;
+  const pct = Math.min(ptScore / PT_TARGET * 100, 100);
+  document.getElementById('ptProgress').style.width = pct + '%';
+  document.getElementById('ptProgressLbl').textContent = ptScore + ' / ' + PT_TARGET + ' poin';
+}
+
+function ptGameOver() {
+  ptRunning = false;
+  clearTimeout(ptSpawnTimer);
+  cancelAnimationFrame(ptAnimFrame);
+  document.getElementById('ptGoScore').textContent = 'Skor kamu: ' + ptScore;
+  document.getElementById('ptGameOver').style.display = 'flex';
+}
+
+function ptWin() {
+  ptRunning = false;
+  clearTimeout(ptSpawnTimer);
+  cancelAnimationFrame(ptAnimFrame);
+  const btn = document.getElementById('btn2');
+  btn.disabled = false; btn.className = 'float-btn ready';
+  document.getElementById('btnText2').textContent = 'Lanjutkan →';
+  document.getElementById('ptProgressLbl').textContent = '🎉 Selesai! Kamu keren banget!';
+}
+
+// Dummy functions agar tidak error (game 2 masih pakai)
+function startGame1() { /* Piano Tiles — sudah handle sendiri */ }
 
 // ─── GAME 2 ──────────────────────────────────
 let gameScore2 = 0;
