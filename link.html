@@ -11,6 +11,7 @@
     body { background: var(--bg); }
     .step-page { display:none; min-height:100vh; flex-direction:column; }
     .step-page.active { display:flex; }
+    #step2.active { height:100vh; overflow:hidden; }
 
     /* Top bar progress */
     .topbar {
@@ -128,6 +129,135 @@
     .game-progress-bar { height:6px; background:var(--bg3); border-radius:4px; overflow:hidden; width:100%; max-width:380px; }
     .game-progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:4px; transition:width .3s; }
 
+
+    /* ══════════════════════════════════════
+       PIANO TILES GAME
+    ══════════════════════════════════════ */
+    .piano-wrap {
+      padding: 0; flex:1; display:flex; flex-direction:column;
+      align-items:stretch; width:100%; height:100vh;
+      background:#07070e;
+    }
+    /* Top bar inside piano */
+    .piano-topbar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 54px 16px 10px;
+      background:rgba(7,7,14,0.95);
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      flex-shrink:0;
+    }
+    .piano-topbar-title {
+      font-size:15px; font-weight:800; letter-spacing:0.5px;
+    }
+    .piano-topbar-title span { color:#f5a623; }
+    .piano-hud {
+      display:flex; gap:0; align-items:stretch;
+    }
+    .piano-hud-item {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:4px 14px; border-left:1px solid rgba(255,255,255,0.07);
+    }
+    .piano-hud-item:first-child { border-left:none; }
+    .piano-hud-num {
+      font-family:'JetBrains Mono',monospace;
+      font-size:18px; font-weight:700; color:#f5a623; line-height:1;
+    }
+    .piano-hud-lbl {
+      font-size:9px; color:rgba(255,255,255,0.3);
+      text-transform:uppercase; letter-spacing:0.8px; margin-top:2px;
+    }
+    .piano-miss-dots { display:flex; gap:4px; justify-content:center; }
+    .miss-dot {
+      width:8px; height:8px; border-radius:50%;
+      background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2);
+      transition:all .25s;
+    }
+    .miss-dot.active {
+      background:#ef4444; border-color:#ef4444;
+      box-shadow:0 0 8px rgba(239,68,68,0.7);
+    }
+
+    /* PROGRESS */
+    .piano-prog-wrap {
+      height:3px; background:rgba(255,255,255,0.06); flex-shrink:0;
+    }
+    .piano-prog-fill {
+      height:100%; background:linear-gradient(90deg,#f5a623,#ff6b35);
+      transition:width .4s;
+    }
+
+    /* BOARD — fills remaining space */
+    .piano-board {
+      flex:1; position:relative; display:flex; flex-direction:row;
+      background:#0a0a12; overflow:hidden; touch-action:none;
+    }
+    .piano-col {
+      flex:1; position:relative;
+      border-right:1px solid rgba(255,255,255,0.04);
+    }
+    .piano-col:last-child { border-right:none; }
+
+    /* Hit zone */
+    .piano-hitzone {
+      position:absolute; bottom:0; left:0; right:0; height:80px;
+      background:rgba(245,166,35,0.03);
+      border-top:2px solid rgba(245,166,35,0.2);
+      pointer-events:none; z-index:3;
+    }
+
+    /* TILE */
+    .piano-tile {
+      position:absolute; left:3px; right:3px; height:90px;
+      border-radius:10px;
+      background:linear-gradient(180deg, #232336 0%, #111120 100%);
+      border:1px solid rgba(255,255,255,0.1);
+      cursor:pointer; z-index:2;
+      touch-action:manipulation;
+      transition:background .05s;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.6);
+    }
+    .piano-tile.hit {
+      background:linear-gradient(180deg,#f5a623 0%,#c97d10 100%) !important;
+      box-shadow:0 0 30px rgba(245,166,35,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+      border-color:rgba(245,166,35,0.6);
+    }
+    .piano-tile.missed {
+      background:rgba(239,68,68,0.25) !important;
+      border-color:rgba(239,68,68,0.5) !important;
+    }
+
+    /* OVERLAYS */
+    .piano-overlay {
+      position:absolute; inset:0; z-index:20;
+      background:rgba(7,7,14,0.92); backdrop-filter:blur(8px);
+      display:flex; flex-direction:column; align-items:center;
+      justify-content:center; gap:10px; padding:24px;
+    }
+    .piano-overlay-icon { font-size:48px; margin-bottom:4px; }
+    .piano-overlay-title { font-size:26px; font-weight:800; letter-spacing:-0.5px; }
+    .piano-overlay-sub { font-size:13px; color:rgba(255,255,255,0.5); text-align:center; line-height:1.6; }
+    .piano-start-btn {
+      margin-top:12px; padding:14px 40px;
+      background:#f5a623; border:none; border-radius:14px;
+      font-size:16px; font-weight:800; color:#000;
+      cursor:pointer; font-family:'Sora',sans-serif;
+      box-shadow:0 6px 28px rgba(245,166,35,0.4);
+      transition:all .2s; letter-spacing:0.3px;
+    }
+    .piano-start-btn:hover { transform:translateY(-2px); box-shadow:0 8px 36px rgba(245,166,35,0.5); }
+    .piano-start-btn:active { transform:scale(0.96); }
+
+    /* Bottom bar */
+    .piano-bottom {
+      flex-shrink:0; padding:12px 16px;
+      background:rgba(7,7,14,0.95);
+      border-top:1px solid rgba(255,255,255,0.06);
+    }
+    .piano-score-lbl {
+      font-size:11px; color:rgba(255,255,255,0.3);
+      text-align:center; margin-bottom:6px;
+    }
+
     /* ── FINAL REVEAL ── */
     .reveal-wrap-new {
       padding:68px 20px 32px; flex:1; max-width:560px;
@@ -242,28 +372,33 @@
 ══════════════════════════════════════════════ -->
 <div class="step-page" id="step2">
   <div class="piano-wrap">
-    <div class="article-tag">Mini Game</div>
-    <div class="game-title">Piano Tiles 🎹</div>
-    <div class="game-sub">Tap tile hitam sebelum lolos ke bawah!<br/>Kumpulkan <strong>50 poin</strong> untuk lanjut. 3 miss = mulai ulang.</div>
 
-    <!-- HUD -->
-    <div class="piano-hud">
-      <div class="piano-hud-item">
-        <div class="piano-hud-num" id="ptScore">0</div>
-        <div class="piano-hud-lbl">Skor</div>
-      </div>
-      <div class="piano-hud-item piano-hud-center">
-        <div class="piano-miss-dots" id="ptMissDots">
-          <span class="miss-dot" id="md0"></span>
-          <span class="miss-dot" id="md1"></span>
-          <span class="miss-dot" id="md2"></span>
+    <!-- TOP BAR -->
+    <div class="piano-topbar">
+      <div class="piano-topbar-title">🎹 Piano <span>Tiles</span></div>
+      <div class="piano-hud">
+        <div class="piano-hud-item">
+          <div class="piano-hud-num" id="ptScore">0</div>
+          <div class="piano-hud-lbl">Skor</div>
         </div>
-        <div class="piano-hud-lbl">Miss</div>
+        <div class="piano-hud-item">
+          <div class="piano-miss-dots">
+            <span class="miss-dot" id="md0"></span>
+            <span class="miss-dot" id="md1"></span>
+            <span class="miss-dot" id="md2"></span>
+          </div>
+          <div class="piano-hud-lbl">Miss</div>
+        </div>
+        <div class="piano-hud-item">
+          <div class="piano-hud-num" id="ptSpeed">1x</div>
+          <div class="piano-hud-lbl">Speed</div>
+        </div>
       </div>
-      <div class="piano-hud-item">
-        <div class="piano-hud-num" id="ptSpeed">1x</div>
-        <div class="piano-hud-lbl">Speed</div>
-      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="piano-prog-wrap">
+      <div class="piano-prog-fill" id="ptProgress" style="width:0%"></div>
     </div>
 
     <!-- BOARD -->
@@ -272,36 +407,34 @@
       <div class="piano-col" id="ptCol1"></div>
       <div class="piano-col" id="ptCol2"></div>
       <div class="piano-col" id="ptCol3"></div>
-      <!-- Hit zone line -->
-      <div class="piano-hitline"></div>
+      <div class="piano-hitzone"></div>
+
       <!-- Start overlay -->
       <div class="piano-overlay" id="ptOverlay">
         <div class="piano-overlay-icon">🎹</div>
         <div class="piano-overlay-title">Piano Tiles</div>
-        <div class="piano-overlay-sub">Tap tile hitam sesuai irama</div>
-        <button class="piano-start-btn" onclick="ptStart()">▶ Mulai</button>
+        <div class="piano-overlay-sub">Tap tile hitam sebelum lolos ke bawah<br/>Kumpulkan <strong style="color:#f5a623">50 poin</strong> untuk lanjut<br/>3 miss = mulai ulang</div>
+        <button class="piano-start-btn" onclick="ptStart()">▶&nbsp; Mulai</button>
       </div>
+
       <!-- Game Over overlay -->
       <div class="piano-overlay" id="ptGameOver" style="display:none">
         <div class="piano-overlay-icon">😵</div>
         <div class="piano-overlay-title">Game Over!</div>
         <div class="piano-overlay-sub" id="ptGoScore">Skor: 0</div>
-        <button class="piano-start-btn" onclick="ptRestart()">↺ Coba Lagi</button>
+        <button class="piano-start-btn" onclick="ptRestart()" style="background:#ef4444;box-shadow:0 6px 28px rgba(239,68,68,0.4)">↺&nbsp; Coba Lagi</button>
       </div>
     </div>
 
-    <!-- Progress -->
-    <div class="game-progress-bar" style="margin-top:12px">
-      <div class="game-progress-fill" id="ptProgress" style="width:0%"></div>
+    <!-- BOTTOM -->
+    <div class="piano-bottom">
+      <div class="piano-score-lbl" id="ptProgressLbl">Tap tile untuk mulai · 0 / 50 poin</div>
+      <button class="float-btn waiting" id="btn2" disabled onclick="nextStep(3)" style="margin:0">
+        <span class="timer-pill">🎹</span>
+        <span id="btnText2">Selesaikan game untuk lanjut</span>
+      </button>
     </div>
-    <div style="margin-top:8px;font-size:11px;color:var(--text3);text-align:center" id="ptProgressLbl">0 / 50 poin</div>
-  </div>
 
-  <div class="float-btn-wrap">
-    <button class="float-btn waiting" id="btn2" disabled onclick="nextStep(3)">
-      <span class="timer-pill">🎹</span>
-      <span id="btnText2">Selesaikan game untuk lanjut</span>
-    </button>
   </div>
 </div>
 
@@ -625,143 +758,134 @@ function startTimerForStep(step) {
 }
 
 // ─── PIANO TILES GAME ────────────────────────
-const PT_TARGET   = 50;
-const PT_COLS     = 4;
-const PT_TILE_H   = 70;
-const NOTES       = [261.63, 329.63, 392.00, 493.88]; // C4 E4 G4 B4
+const PT_TARGET  = 50;
+const PT_COLS    = 4;
+const NOTES      = [261.63, 329.63, 392.00, 523.25]; // C4 E4 G4 C5
 
-let ptScore       = 0;
-let ptMiss        = 0;
-let ptRunning     = false;
-let ptSpawnTimer  = null;
-let ptAnimFrame   = null;
-let ptTiles       = [];
-let ptSpeed       = 2.2;   // px per frame
-let ptInterval    = 900;   // ms between spawns
-let ptAudioCtx    = null;
-let ptLastCol     = -1;
+let ptScore    = 0;
+let ptMiss     = 0;
+let ptRunning  = false;
+let ptSpawnTmr = null;
+let ptAnimId   = null;
+let ptTiles    = [];
+let ptSpeed    = 3;
+let ptInterval = 850;
+let ptAudioCtx = null;
+let ptLastCol  = -1;
+let ptBoardH   = 500;
 
-function ptGetAudio() {
+function ptAudio() {
   if (!ptAudioCtx) ptAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
   return ptAudioCtx;
 }
 
 function ptPlayNote(col, hit) {
   try {
-    const ctx  = ptGetAudio();
+    const ctx  = ptAudio();
     const osc  = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain); gain.connect(ctx.destination);
-    osc.type      = 'triangle';
-    osc.frequency.value = NOTES[col] * (hit ? 1 : 0.5);
-    gain.gain.setValueAtTime(hit ? 0.35 : 0.12, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (hit ? 0.45 : 0.2));
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.5);
+    osc.type = hit ? 'triangle' : 'sine';
+    osc.frequency.value = hit ? NOTES[col] : NOTES[col] * 0.45;
+    gain.gain.setValueAtTime(hit ? 0.3 : 0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (hit ? 0.5 : 0.18));
+    osc.start(); osc.stop(ctx.currentTime + 0.55);
   } catch(e) {}
 }
 
 function ptStart() {
   document.getElementById('ptOverlay').style.display = 'none';
+  ptBoardH = document.getElementById('ptBoard').clientHeight || 500;
   ptRestart();
 }
 
 function ptRestart() {
-  // Reset state
   ptScore = 0; ptMiss = 0; ptRunning = true;
-  ptSpeed = 2.2; ptInterval = 900; ptTiles = [];
-  ptLastCol = -1;
+  ptSpeed = 3; ptInterval = 850; ptTiles = []; ptLastCol = -1;
+  ptBoardH = document.getElementById('ptBoard').clientHeight || 500;
 
-  // Clear board
+  // Clear cols
   for (let c = 0; c < PT_COLS; c++) {
     document.getElementById('ptCol' + c).innerHTML = '';
   }
   document.getElementById('ptGameOver').style.display = 'none';
-
-  // Reset HUD
-  ptUpdateHUD();
   for (let i = 0; i < 3; i++) document.getElementById('md' + i).classList.remove('active');
-
-  // Start loops
-  clearInterval(ptSpawnTimer);
-  cancelAnimationFrame(ptAnimFrame);
-  ptSpawnLoop();
-  ptAnimLoop();
+  ptUpdateHUD();
+  clearTimeout(ptSpawnTmr); cancelAnimationFrame(ptAnimId);
+  ptDoSpawn(); ptLoop();
 }
 
-function ptSpawnLoop() {
+function ptDoSpawn() {
   if (!ptRunning) return;
-  ptSpawnTile();
-  // Ramp up speed
-  if (ptScore > 10)  { ptSpeed = 2.8; ptInterval = 780; }
-  if (ptScore > 25)  { ptSpeed = 3.4; ptInterval = 680; }
-  if (ptScore > 40)  { ptSpeed = 4.0; ptInterval = 600; }
-  ptSpawnTimer = setTimeout(ptSpawnLoop, ptInterval);
-}
-
-function ptSpawnTile() {
-  // Pick random col, avoid same col twice in a row
   let col;
-  do { col = Math.floor(Math.random() * PT_COLS); } while (col === ptLastCol);
+  let tries = 0;
+  do { col = Math.floor(Math.random() * PT_COLS); tries++; } while (col === ptLastCol && tries < 10);
   ptLastCol = col;
 
-  const board  = document.getElementById('ptBoard');
-  const colEl  = document.getElementById('ptCol' + col);
-  const tile   = document.createElement('div');
+  const colEl = document.getElementById('ptCol' + col);
+  const tile  = document.createElement('div');
   tile.className = 'piano-tile';
-  tile.style.top = '-' + PT_TILE_H + 'px';
+  tile.style.top = '-95px';
 
   let tapped = false;
-  const tapHandler = (e) => {
+  const onTap = (e) => {
     e.preventDefault(); e.stopPropagation();
-    if (tapped) return;
+    if (tapped || !ptRunning) return;
     tapped = true;
     tile.classList.add('hit');
     ptPlayNote(col, true);
     ptScore++;
-    ptUpdateHUD();
-    setTimeout(() => tile.remove(), 120);
-    // Remove from tracking
     ptTiles = ptTiles.filter(t => t.el !== tile);
+    setTimeout(() => tile.remove(), 100);
+    ptUpdateHUD();
     if (ptScore >= PT_TARGET) ptWin();
   };
-  tile.addEventListener('touchstart', tapHandler, { passive:false });
-  tile.addEventListener('mousedown',  tapHandler);
+  tile.addEventListener('touchstart', onTap, { passive: false });
+  tile.addEventListener('mousedown',  onTap);
 
   colEl.appendChild(tile);
-  ptTiles.push({ el: tile, col, tapped: () => tapped });
+  ptTiles.push({ el: tile, col, get tapped(){ return tapped; } });
+
+  // Ramp speed
+  if (ptScore >= 40) { ptSpeed = 5.5; ptInterval = 560; }
+  else if (ptScore >= 25) { ptSpeed = 4.5; ptInterval = 660; }
+  else if (ptScore >= 12) { ptSpeed = 3.8; ptInterval = 750; }
+
+  ptSpawnTmr = setTimeout(ptDoSpawn, ptInterval);
 }
 
-function ptAnimLoop() {
+function ptLoop() {
   if (!ptRunning) return;
-  const board    = document.getElementById('ptBoard');
-  const boardH   = board ? board.clientHeight : 420;
-  const missLine = boardH; // tile reaches bottom = miss
+  const hitZone = ptBoardH - 80; // where hit zone starts
 
-  ptTiles.forEach((t, i) => {
-    if (!t.el.parentNode) return;
-    const cur = parseFloat(t.el.style.top) || -PT_TILE_H;
+  for (let i = ptTiles.length - 1; i >= 0; i--) {
+    const t = ptTiles[i];
+    if (!t.el.isConnected) { ptTiles.splice(i, 1); continue; }
+    const cur  = parseFloat(t.el.style.top) || -95;
     const next = cur + ptSpeed;
     t.el.style.top = next + 'px';
 
-    // Missed — passed bottom without tap
-    if (next > missLine && !t.tapped()) {
+    // Miss: tile bottom passed board bottom
+    if (next > ptBoardH && !t.tapped) {
       t.el.classList.add('missed');
       ptPlayNote(t.col, false);
-      setTimeout(() => t.el.remove(), 200);
+      setTimeout(() => { if(t.el.isConnected) t.el.remove(); }, 180);
       ptTiles.splice(i, 1);
       ptMiss++;
-      document.getElementById('md' + Math.min(ptMiss - 1, 2)).classList.add('active');
+      if (ptMiss <= 3) {
+        const dot = document.getElementById('md' + (ptMiss - 1));
+        if (dot) dot.classList.add('active');
+      }
       if (ptMiss >= 3) { ptGameOver(); return; }
     }
-  });
+  }
 
-  ptAnimFrame = requestAnimationFrame(ptAnimLoop);
+  ptAnimId = requestAnimationFrame(ptLoop);
 }
 
 function ptUpdateHUD() {
   document.getElementById('ptScore').textContent = ptScore;
-  const lvl = ptScore > 40 ? '4x' : ptScore > 25 ? '3x' : ptScore > 10 ? '2x' : '1x';
+  const lvl = ptScore >= 40 ? '4x' : ptScore >= 25 ? '3x' : ptScore >= 12 ? '2x' : '1x';
   document.getElementById('ptSpeed').textContent = lvl;
   const pct = Math.min(ptScore / PT_TARGET * 100, 100);
   document.getElementById('ptProgress').style.width = pct + '%';
@@ -770,24 +894,21 @@ function ptUpdateHUD() {
 
 function ptGameOver() {
   ptRunning = false;
-  clearTimeout(ptSpawnTimer);
-  cancelAnimationFrame(ptAnimFrame);
-  document.getElementById('ptGoScore').textContent = 'Skor kamu: ' + ptScore;
+  clearTimeout(ptSpawnTmr); cancelAnimationFrame(ptAnimId);
+  document.getElementById('ptGoScore').textContent = 'Skor kamu: ' + ptScore + ' / ' + PT_TARGET;
   document.getElementById('ptGameOver').style.display = 'flex';
 }
 
 function ptWin() {
   ptRunning = false;
-  clearTimeout(ptSpawnTimer);
-  cancelAnimationFrame(ptAnimFrame);
+  clearTimeout(ptSpawnTmr); cancelAnimationFrame(ptAnimId);
   const btn = document.getElementById('btn2');
-  btn.disabled = false; btn.className = 'float-btn ready';
-  document.getElementById('btnText2').textContent = 'Lanjutkan →';
-  document.getElementById('ptProgressLbl').textContent = '🎉 Selesai! Kamu keren banget!';
+  btn.disabled = false; btn.className = 'float-btn final';
+  document.getElementById('btnText2').textContent = '🎉 Lanjutkan →';
+  document.getElementById('ptProgressLbl').textContent = '🎉 Keren! Kamu berhasil!';
 }
 
-// Dummy functions agar tidak error (game 2 masih pakai)
-function startGame1() { /* Piano Tiles — sudah handle sendiri */ }
+function startGame1() { /* Piano Tiles pakai ptStart() */ }
 
 // ─── GAME 2 ──────────────────────────────────
 let gameScore2 = 0;
