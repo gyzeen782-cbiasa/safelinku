@@ -128,124 +128,6 @@
     .game-progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:4px; transition:width .3s; }
 
 
-    /* ══════════════════════════════════════
-       WORD GAME
-    ══════════════════════════════════════ */
-    .wg-wrap {
-      padding: 68px 20px 120px; flex:1; display:flex; flex-direction:column;
-      align-items:center; text-align:center; max-width:480px; margin:0 auto; width:100%;
-      overflow-y:auto; -webkit-overflow-scrolling:touch;
-    }
-
-    /* Theme badge & title */
-    .wg-theme { font-size:12px; font-weight:700; text-transform:uppercase;
-      letter-spacing:1.5px; color:var(--accent); margin-bottom:6px; }
-    .wg-title { font-size:20px; font-weight:800; margin-bottom:4px; }
-    .wg-sub { font-size:12px; color:var(--text2); margin-bottom:20px; line-height:1.5; }
-
-    /* Word rows */
-    .wg-words { display:flex; flex-direction:column; gap:14px; width:100%; margin-bottom:24px; }
-    .wg-word-row { display:flex; flex-direction:column; gap:6px; align-items:center; }
-    .wg-clue { font-size:11px; color:var(--text3); letter-spacing:0.3px; }
-    .wg-boxes { display:flex; gap:6px; justify-content:center; }
-    .wg-box {
-      width:42px; height:42px; border-radius:10px;
-      background:var(--bg3); border:2px solid var(--border2);
-      display:flex; align-items:center; justify-content:center;
-      font-size:18px; font-weight:800; color:var(--text);
-      transition:all .2s; font-family:'JetBrains Mono',monospace;
-      text-transform:uppercase;
-    }
-    .wg-box.hint { background:var(--bg2); border-color:rgba(245,166,35,0.4); color:var(--accent); }
-    .wg-box.filled { background:rgba(245,166,35,0.12); border-color:var(--accent); color:var(--text); }
-    .wg-box.correct {
-      background:rgba(34,197,94,0.15); border-color:#22c55e; color:#22c55e;
-      animation:boxPop .3s cubic-bezier(.34,1.56,.64,1);
-    }
-    .wg-box.wrong {
-      background:rgba(239,68,68,0.15); border-color:#ef4444; color:#ef4444;
-      animation:shake .3s ease;
-    }
-    .wg-box.active-target { border-color:var(--accent); box-shadow:0 0 0 3px rgba(245,166,35,0.2); }
-    @keyframes boxPop { from{transform:scale(0.8)} to{transform:scale(1)} }
-    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
-
-    /* Word status indicator */
-    .wg-word-done { opacity:0.5; }
-    .wg-word-check {
-      width:22px; height:22px; border-radius:50%; background:#22c55e;
-      display:none; align-items:center; justify-content:center;
-      font-size:12px; color:#fff; flex-shrink:0;
-    }
-    .wg-word-row.done .wg-word-check { display:flex; }
-
-    /* Input area */
-    .wg-input-area {
-      width:100%; background:var(--bg2); border:1px solid var(--border);
-      border-radius:18px; padding:16px; margin-bottom:0;
-    }
-    .wg-input-label { font-size:10px; color:var(--text3); text-transform:uppercase;
-      letter-spacing:1px; margin-bottom:10px; }
-    .wg-typed-display {
-      min-height:44px; background:var(--bg3); border:1px solid var(--border2);
-      border-radius:10px; display:flex; align-items:center; justify-content:center;
-      gap:4px; padding:6px 12px; margin-bottom:12px; flex-wrap:wrap;
-    }
-    .wg-typed-letter {
-      width:32px; height:32px; border-radius:8px;
-      background:var(--accent); color:#000; font-weight:800;
-      font-size:16px; display:flex; align-items:center; justify-content:center;
-      font-family:'JetBrains Mono',monospace;
-      animation:letterPop .15s cubic-bezier(.34,1.56,.64,1);
-    }
-    @keyframes letterPop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
-
-    /* Letter wheel */
-    .wg-wheel-wrap { position:relative; width:240px; height:240px; margin:16px auto 24px; flex-shrink:0; }
-    .wg-wheel-btn {
-      position:absolute; width:52px; height:52px; border-radius:50%;
-      background:var(--bg3); border:2px solid var(--border2);
-      display:flex; align-items:center; justify-content:center;
-      font-size:18px; font-weight:800; cursor:pointer;
-      font-family:'JetBrains Mono',monospace; color:var(--text);
-      transition:all .15s; user-select:none; text-transform:uppercase;
-      transform:translate(-50%,-50%);
-    }
-    .wg-wheel-btn:hover, .wg-wheel-btn:active { background:var(--accent); color:#000; border-color:var(--accent); transform:translate(-50%,-50%) scale(1.1); }
-    .wg-wheel-btn.used { background:var(--bg2); color:var(--text3); border-color:var(--border); cursor:not-allowed; }
-    .wg-wheel-center {
-      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-      width:52px; height:52px; border-radius:50%; background:var(--bg3);
-      border:2px solid var(--border2); display:flex; align-items:center;
-      justify-content:center; cursor:pointer; font-size:16px;
-      transition:all .2s;
-    }
-    .wg-wheel-center:hover { background:var(--red-s); border-color:var(--red); }
-
-    /* Action buttons */
-    .wg-actions { display:flex; gap:8px; width:100%; }
-    .wg-submit {
-      flex:2; padding:12px; background:var(--accent); border:none; border-radius:12px;
-      font-size:14px; font-weight:800; color:#000; cursor:pointer;
-      font-family:'Sora',sans-serif; transition:all .2s;
-    }
-    .wg-submit:hover { transform:translateY(-2px); box-shadow:0 4px 16px var(--accent-g); }
-    .wg-submit:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
-    .wg-clear {
-      flex:1; padding:12px; background:var(--bg3); border:1px solid var(--border2);
-      border-radius:12px; font-size:14px; font-weight:600; color:var(--text2);
-      cursor:pointer; font-family:'Sora',sans-serif; transition:all .2s;
-    }
-    .wg-clear:hover { border-color:var(--red); color:var(--red); }
-
-    /* Progress */
-    .wg-progress-wrap { display:flex; gap:6px; width:100%; margin-bottom:16px; }
-    .wg-progress-dot {
-      flex:1; height:5px; border-radius:4px; background:var(--bg3);
-      transition:background .4s;
-    }
-    .wg-progress-dot.done { background:var(--accent); }
-
 
     /* ── FINAL REVEAL ── */
     .reveal-wrap-new {
@@ -357,16 +239,36 @@
 </div>
 
 <!-- ═══════════════════════════════════════════
-     STEP 2 — Word Puzzle
+     STEP 2 — Artikel Internet
 ══════════════════════════════════════════════ -->
 <div class="step-page" id="step2">
-  <div class="wg-wrap" id="wgWrap">
-    <!-- Diisi oleh JS -->
+  <div class="article-wrap">
+    <div class="article-tag">Internet & Media Sosial</div>
+    <h1 class="article-title">5 Kebiasaan Buruk di Internet yang Harus Kamu Hindari</h1>
+    <div class="article-meta">
+      <span>📅 2025</span>
+      <span>⏱ 3 menit baca</span>
+      <span>🌐 Digital Lifestyle</span>
+    </div>
+    <div class="article-body">
+      <p>Internet adalah alat yang luar biasa — tapi seperti pisau, bahayanya tergantung cara penggunaannya. Banyak orang tanpa sadar melakukan kebiasaan buruk di internet yang bisa merugikan diri sendiri maupun orang lain.</p>
+      <h3>1. Oversharing di Media Sosial</h3>
+      <p>Memposting terlalu banyak informasi pribadi seperti lokasi real-time, nomor telepon, atau rutinitas harian bisa menjadi celah bagi orang yang berniat jahat. Ingat, apa yang kamu posting di internet bisa bertahan selamanya meski sudah dihapus.</p>
+      <h3>2. Mengklik Link Sembarangan</h3>
+      <p>Link yang dikirim lewat pesan atau komentar asing sangat berbahaya. Bisa jadi itu adalah <strong>phishing</strong> — upaya mencuri data login atau informasi keuangan kamu. Selalu periksa domain URL sebelum mengklik.</p>
+      <h3>3. Menggunakan Password yang Sama di Semua Akun</h3>
+      <p>Kalau satu akun bocor, semua akun kamu bisa ikut diretas. Gunakan password manager seperti Bitwarden atau 1Password untuk membuat dan menyimpan password unik di setiap platform.</p>
+      <h3>4. Tidak Memperbarui Aplikasi</h3>
+      <p>Update bukan cuma soal fitur baru — sebagian besar update berisi <strong>security patch</strong> yang menutup celah keamanan. Menunda update berarti membiarkan celah itu terbuka untuk dieksploitasi.</p>
+      <h3>5. Percaya Semua yang Dibaca Online</h3>
+      <p>Misinformasi menyebar 6x lebih cepat dari fakta di internet. Sebelum membagikan berita atau informasi, cek dulu kebenarannya lewat sumber terpercaya. Jangan jadi bagian dari rantai penyebaran hoaks.</p>
+      <p>Dengan menghindari 5 kebiasaan di atas, pengalaman internetmu akan jauh lebih aman dan menyenangkan. Jadilah pengguna internet yang cerdas dan bertanggung jawab!</p>
+    </div>
   </div>
   <div class="float-btn-wrap">
     <button class="float-btn waiting" id="btn2" disabled onclick="nextStep(3)">
-      <span class="timer-pill">🔤</span>
-      <span id="btnText2">Tebak semua kata untuk lanjut</span>
+      <span class="timer-pill" id="timer2">⏳ 12</span>
+      <span id="btnText2">Lanjutkan</span>
     </button>
   </div>
 </div>
@@ -585,7 +487,7 @@ let linkData = null;
 const linkId = getParam('id') || location.pathname.split('/l/')[1];
 
 // Timer configs per step (detik)
-const TIMERS = { 1:12, 3:12, 4:12, 6:10 };
+const TIMERS = { 1:12, 2:12, 3:12, 4:12, 6:10 };
 // Steps yang pakai game: 2, 5
 // Steps yang pakai timer: 1, 3, 4, 6
 
@@ -660,8 +562,7 @@ function nextStep(n) {
   updateTrack(n);
   window.scrollTo(0, 0);
 
-  if (n === 2) startGame1();
-  else if (n === 5) startGame2();
+  if (n === 5) startGame2();
   else if (TIMERS[n]) startTimerForStep(n);
 }
 
@@ -688,266 +589,6 @@ function startTimerForStep(step) {
       }
     }
   }, 1000);
-}
-
-// ─── WORD PUZZLE GAME ───────────────────────
-
-const WG_SETS = [
-  {
-    theme: '🖥️ Digital',
-    desc: 'Tebak 3 kata bertema dunia digital!',
-    words: [
-      { word: 'KODE',  clue: 'Instruksi untuk komputer',    hint: [0] },
-      { word: 'AKUN',  clue: 'Profil login pengguna',       hint: [0,3] },
-      { word: 'VIRUS', clue: 'Ancaman berbahaya di sistem', hint: [1] }
-    ],
-    letters: ['K','O','D','E','A','U','N','V','I','R','S','X']
-  },
-  {
-    theme: '📚 Edukasi',
-    desc: 'Tebak 3 kata bertema belajar & ilmu!',
-    words: [
-      { word: 'BUKU',  clue: 'Sumber ilmu yang bisa dibaca', hint: [0] },
-      { word: 'TULIS', clue: 'Menuangkan pikiran di kertas', hint: [2] },
-      { word: 'NILAI', clue: 'Angka hasil ujian',            hint: [0,4] }
-    ],
-    letters: ['B','U','K','T','L','I','S','N','A','E','M','O']
-  },
-  {
-    theme: '🌿 Alam',
-    desc: 'Tebak 3 kata bertema alam sekitar!',
-    words: [
-      { word: 'AWAN',  clue: 'Mengapung di langit biru',   hint: [0] },
-      { word: 'BUMI',  clue: 'Planet tempat kita tinggal', hint: [1] },
-      { word: 'LAUT',  clue: 'Hamparan air asin yang luas', hint: [0,3] }
-    ],
-    letters: ['A','W','N','B','U','M','I','L','T','E','O','K']
-  }
-];
-
-let wgSet       = null;
-let wgTyped     = [];
-let wgSolved    = [];
-let wgActive    = 0; // which word is currently being solved
-
-function startGame1() {
-  // Pick random set
-  wgSet    = WG_SETS[Math.floor(Math.random() * WG_SETS.length)];
-  wgSolved = wgSet.words.map(() => false);
-  wgActive = wgSet.words.findIndex(w => !wgSolved[wgSet.words.indexOf(w)]);
-  wgTyped  = [];
-  wgRender();
-}
-
-function wgRender() {
-  const wrap = document.getElementById('wgWrap');
-  if (!wrap) return;
-
-  // ── Header ──
-  let html = `
-    <div class="article-tag">${wgSet.theme}</div>
-    <div class="game-title">Tebak Kata 🔤</div>
-    <div class="game-sub">${wgSet.desc}<br/>Tebak semua kata untuk lanjut!</div>
-
-    <div class="wg-progress-wrap">
-      ${wgSet.words.map((_,i) => `<div class="wg-progress-dot${wgSolved[i]?' done':''}" id="wpd${i}"></div>`).join('')}
-    </div>
-
-    <div class="wg-words" id="wgWords">`;
-
-  // ── Word rows ──
-  wgSet.words.forEach((w, wi) => {
-    const isDone = wgSolved[wi];
-    const isActive = wi === wgActive && !isDone;
-    html += `<div class="wg-word-row${isDone?' done':''}" id="wgRow${wi}">
-      <div style="display:flex;align-items:center;gap:8px">
-        <div class="wg-clue">${wi+1}. ${w.clue}</div>
-        <div class="wg-word-check" id="wgCheck${wi}">✓</div>
-      </div>
-      <div class="wg-boxes">`;
-
-    w.word.split('').forEach((letter, li) => {
-      const isHint   = w.hint.includes(li);
-      const isFilled = isDone;
-      let cls = 'wg-box';
-      if (isHint)   cls += ' hint';
-      if (isFilled) cls += ' correct';
-      if (isActive && !isHint) cls += ' active-target';
-      const show = (isHint || isFilled) ? letter : '';
-      html += `<div class="${cls}" id="wgBox${wi}_${li}">${show}</div>`;
-    });
-
-    html += `</div></div>`;
-  });
-
-  html += `</div>
-
-    <div class="wg-input-area">
-      <div class="wg-input-label">Ketikkan jawaban kata #${wgActive + 1}</div>
-      <div class="wg-typed-display" id="wgTypedDisplay">
-        <span style="color:var(--text3);font-size:13px" id="wgTypedPlaceholder">Tap huruf di bawah...</span>
-      </div>
-      <div class="wg-actions">
-        <button class="wg-submit" id="wgSubmitBtn" onclick="wgSubmit()" disabled>Cek Jawaban ✓</button>
-        <button class="wg-clear" onclick="wgClear()">⌫ Hapus</button>
-      </div>
-    </div>
-
-    <div class="wg-wheel-wrap" id="wgWheel"></div>
-  `;
-
-  wrap.innerHTML = html;
-  wgRenderWheel();
-}
-
-function wgRenderWheel() {
-  const wheel   = document.getElementById('wgWheel');
-  if (!wheel) return;
-  const letters = wgSet.letters;
-  const N       = letters.length;
-  const R       = 95; // radius
-  const CX      = 120, CY = 120;
-
-  let html = '';
-  letters.forEach((l, i) => {
-    const angle = (i / N) * 2 * Math.PI - Math.PI / 2;
-    const x = CX + R * Math.cos(angle);
-    const y = CY + R * Math.sin(angle);
-    html += `<button class="wg-wheel-btn" id="wgLetter_${i}"
-      style="left:${x}px;top:${y}px"
-      onclick="wgTapLetter('${l}',${i})">${l}</button>`;
-  });
-
-  // Center = delete last
-  html += `<div class="wg-wheel-center" onclick="wgDeleteLast()" title="Hapus">⌫</div>`;
-  wheel.innerHTML = html;
-}
-
-function wgTapLetter(letter, idx) {
-  if (wgSolved[wgActive]) return;
-  const target = wgSet.words[wgActive];
-  // Max length = word length
-  if (wgTyped.length >= target.word.length) return;
-
-  wgTyped.push({ letter, idx });
-  wgUpdateTyped();
-}
-
-function wgDeleteLast() {
-  if (!wgTyped.length) return;
-  wgTyped.pop();
-  wgUpdateTyped();
-}
-
-function wgClear() {
-  wgTyped = [];
-  wgUpdateTyped();
-}
-
-function wgUpdateTyped() {
-  const display = document.getElementById('wgTypedDisplay');
-  const ph      = document.getElementById('wgTypedPlaceholder');
-  const submit  = document.getElementById('wgSubmitBtn');
-  if (!display) return;
-
-  // Non-hint letters typed so far
-  const target   = wgSet.words[wgActive];
-  const nonHints = target.word.split('').filter((_,i) => !target.hint.includes(i)).length;
-
-  if (!wgTyped.length) {
-    display.innerHTML = '<span style="color:var(--text3);font-size:13px">Tap huruf di bawah...</span>';
-    if (submit) submit.disabled = true;
-    return;
-  }
-
-  display.innerHTML = wgTyped.map(t =>
-    `<div class="wg-typed-letter">${t.letter}</div>`
-  ).join('');
-
-  // Enable submit when typed enough for non-hint slots
-  if (submit) submit.disabled = wgTyped.length < nonHints;
-}
-
-function wgSubmit() {
-  const target   = wgSet.words[wgActive];
-  const word     = target.word;
-  const nonHintPositions = word.split('').map((l,i) => target.hint.includes(i) ? null : i).filter(i => i !== null);
-
-  // Build full answer: fill hint positions automatically, rest from typed
-  let typedIdx = 0;
-  let answer   = '';
-  for (let i = 0; i < word.length; i++) {
-    if (target.hint.includes(i)) {
-      answer += word[i];
-    } else {
-      answer += (wgTyped[typedIdx] ? wgTyped[typedIdx].letter : '_');
-      typedIdx++;
-    }
-  }
-
-  const correct = answer.toUpperCase() === word.toUpperCase();
-
-  // Flash boxes
-  word.split('').forEach((_, li) => {
-    const box = document.getElementById(`wgBox${wgActive}_${li}`);
-    if (!box) return;
-    box.textContent = answer[li];
-    box.className = 'wg-box ' + (correct ? 'correct' : 'wrong');
-  });
-
-  if (correct) {
-    wgSolved[wgActive] = true;
-    const row = document.getElementById(`wgRow${wgActive}`);
-    if (row) row.classList.add('done');
-    const pd  = document.getElementById(`wpd${wgActive}`);
-    if (pd)  pd.classList.add('done');
-    const chk = document.getElementById(`wgCheck${wgActive}`);
-    if (chk) chk.style.display = 'flex';
-
-    wgTyped = [];
-
-    // Check win
-    if (wgSolved.every(Boolean)) {
-      setTimeout(wgWin, 600);
-      return;
-    }
-
-    // Move to next unsolved
-    setTimeout(() => {
-      wgActive = wgSolved.findIndex((v, i) => !v);
-      wgTyped  = [];
-      wgRender();
-    }, 700);
-
-  } else {
-    // Wrong — shake then clear
-    setTimeout(() => {
-      word.split('').forEach((_, li) => {
-        const box = document.getElementById(`wgBox${wgActive}_${li}`);
-        if (box) {
-          box.className = 'wg-box' + (target.hint.includes(li) ? ' hint' : ' active-target');
-          box.textContent = target.hint.includes(li) ? word[li] : '';
-        }
-      });
-      wgTyped = [];
-      wgUpdateTyped();
-    }, 700);
-  }
-}
-
-function wgWin() {
-  const btn = document.getElementById('btn2');
-  if (btn) { btn.disabled = false; btn.className = 'float-btn final'; }
-  document.getElementById('btnText2').textContent = '🎉 Lanjutkan →';
-
-  const wrap = document.getElementById('wgWrap');
-  if (wrap) {
-    const win = document.createElement('div');
-    win.style.cssText = 'text-align:center;padding:16px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:16px;margin-top:16px';
-    win.innerHTML = '<div style="font-size:32px;margin-bottom:6px">🎉</div><div style="font-size:16px;font-weight:800;color:#22c55e">Semua kata benar!</div><div style="font-size:12px;color:var(--text2);margin-top:4px">Kamu berhasil menebak ' + wgSet.words.length + '/' + wgSet.words.length + ' kata</div>';
-    wrap.appendChild(win);
-    setTimeout(() => btn && btn.scrollIntoView({ behavior:'smooth', block:'center' }), 400);
-  }
 }
 
 
